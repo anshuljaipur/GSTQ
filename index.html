@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlacierPOS - GST Billing</title>
+    <!-- Simple styling for your shop -->
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #1a73e8; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background: #1557b0; }
+        .invoice-box { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 5px solid #1a73e8; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>GlacierPOS: New Invoice</h2>
+    
+    <div class="form-group">
+        <label>Customer GSTIN (Leave blank for B2C)</label>
+        <input type="text" id="custGstin" placeholder="08AAAAA0000A1Z5">
+    </div>
+
+    <div class="form-group">
+        <label>Item Name</label>
+        <input type="text" id="itemName" placeholder="Ice Cream / Bakery Item">
+    </div>
+
+    <div class="form-group">
+        <label>Amount (Before Tax)</label>
+        <input type="number" id="baseAmount" placeholder="0.00">
+    </div>
+
+    <div class="form-group">
+        <label>GST Rate</label>
+        <select id="gstRate">
+            <option value="5">5%</option>
+            <option value="12">12%</option>
+            <option value="18" selected>18%</option>
+            <option value="28">28%</option>
+        </select>
+    </div>
+
+    <button onclick="saveInvoice()">Save & Calculate Bill</button>
+
+    <div id="displayArea" class="invoice-box" style="display:none;"></div>
+</div>
+
+<!-- FIREBASE SCRIPTS (The Brains) -->
+<script type="module">
+  // Import the functions you need from the SDKs
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // TODO: Replace with YOUR GlacierPOS config from Firebase Console
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "glacierpos.firebaseapp.com",
+    projectId: "glacierpos",
+    storageBucket: "glacierpos.appspot.com",
+    messagingSenderId: "YOUR_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Logic to calculate and save
+  window.saveInvoice = async function() {
+      const base = parseFloat(document.getElementById('baseAmount').value);
+      const rate = parseFloat(document.getElementById('gstRate').value);
+      const gstin = document.getElementById('custGstin').value || "B2C / Cash";
+      
+      const tax = (base * rate) / 100;
+      const total = base + tax;
+
+      // GST Math for Regular Scheme
+      const cgst = tax / 2;
+      const sgst = tax / 2;
+
+      const invoiceData = {
+          customer: gstin,
+          item: document.getElementById('itemName').value,
+          taxableValue: base,
+          cgst: cgst,
+          sgst: sgst,
+          total: total,
+          date: new Date().toISOString(),
+          quarter: "Q1-2026" // For your QRMP filing later
+      };
+
+      try {
+          // SAVE TO FIREBASE
+          const docRef = await addDoc(collection(db, "invoices"), invoiceData);
+          
+          // SHOW ON SCREEN
+          document.getElementById('displayArea').style.display = 'block';
+          document.getElementById('displayArea').innerHTML = `
+              <strong>Invoice Saved! ID: ${docRef.id}</strong><br>
+              Taxable: ₹${base.toFixed(2)}<br>
+              CGST: ₹${cgst.toFixed(2)} | SGST: ₹${sgst.toFixed(2)}<br>
+              <strong>Grand Total: ₹${total.toFixed(2)}</strong>
+          `;
+          alert("Bill saved to GlacierPOS database!");
+      } catch (e) {
+          console.error("Error adding document: ", e);
+          alert("Error saving bill. Check Console.");
+      }
+  }
+</script>
+
+</body>
+</html>
