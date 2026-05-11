@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glacier Manager - Composition ERP</title>
+    <style>
+        :root { --primary: #2980b9; --success: #27ae60; --danger: #c0392b; --warning: #f39c12; --dark: #2c3e50; --light: #ecf0f1; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--light); margin: 0; padding: 20px; color: var(--dark); }
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        
+        /* Entry Form */
+        .entry-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
+        .entry-card h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #555; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 15px; }
+        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-save:hover { background: #1f6391; }
+
+        /* Dashboard */
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .dash-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .dash-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: #7f8c8d; }
+        .dash-card .amt { font-size: 24px; font-weight: bold; }
+        
+        .c-cash { border-left: 5px solid var(--success); } .c-cash .amt { color: var(--success); }
+        .c-bank { border-left: 5px solid var(--primary); } .c-bank .amt { color: var(--primary); }
+        .c-debt { border-left: 5px solid var(--warning); } .c-debt .amt { color: var(--warning); }
+        .c-cred { border-left: 5px solid var(--danger); } .c-cred .amt { color: var(--danger); }
+        
+        /* P&L Special Card */
+        .pl-card { grid-column: span 2; background: var(--dark); color: white; border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .pl-card h2 { margin: 0; font-size: 18px; color: #bdc3c7; }
+        .pl-card .amt { font-size: 32px; font-weight: bold; color: #2ecc71; }
+        
+        .header { grid-column: span 2; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .btn-refresh { background: var(--warning); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🍦 Glacier ERP (Composition Scheme)</h1>
+        <button class="btn-refresh" onclick="loadDashboard()">🔄 Refresh Dashboard</button>
+    </div>
+
+    <!-- LEFT: TRANSACTION ENTRY -->
+    <div class="entry-card">
+        <h2>📝 New Transaction</h2>
+        
+        <div class="form-group">
+            <label>Transaction Type</label>
+            <select id="tType" onchange="toggleFields()">
+                <option value="Sale">Bill of Supply (Sale)</option>
+                <option value="Purchase">Purchase (Stock/Raw Material)</option>
+                <option value="Expense_Biz">Business Expense (Rent, Electricity, Staff)</option>
+                <option value="Expense_Personal">Personal Expense (Drawings/Home)</option>
+                <option value="Receipt">Receive Money (from Customer/Debtor)</option>
+                <option value="Payment">Pay Money (to Supplier/Creditor)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Total Amount (₹)</label>
+            <input type="number" id="tAmount" placeholder="0.00">
+        </div>
+
+        <div class="form-group" id="modeGroup">
+            <label>Payment Mode</label>
+            <select id="tMode">
+                <option value="Cash">Cash (Galla)</option>
+                <option value="Bank">Bank / UPI</option>
+                <option value="Credit">Unpaid (Add to Credit Book)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label id="partyLabel">Customer / Supplier Name</label>
+            <input type="text" id="tParty" placeholder="Name or Description">
+        </div>
+
+        <div class="form-group">
+            <label>Bill Ref / Notes (Optional)</label>
+            <input type="text" id="tRef" placeholder="e.g. Bill #102 or 'Electricity Bill'">
+        </div>
+
+        <button class="btn-save" id="saveBtn" onclick="saveTransaction()">💾 Save Transaction</button>
+    </div>
+
+    <!-- RIGHT: FINANCIAL DASHBOARD -->
+    <div>
+        <div class="dashboard">
+            <!-- Profit & Loss -->
+            <div class="pl-card">
+                <div>
+                    <h2>Net Business Profit</h2>
+                    <small>Sales - Purchases - Biz Expenses</small>
+                </div>
+                <div class="amt" id="dProfit">₹0.00</div>
+            </div>
+
+            <!-- Liquidity -->
+            <div class="dash-card c-cash">
+                <h3>Cash in Hand (Galla)</h3>
+                <div class="amt" id="dCash">₹0.00</div>
+            </div>
+            <div class="dash-card c-bank">
+                <h3>Bank / UPI Balance</h3>
+                <div class="amt" id="dBank">₹0.00</div>
+            </div>
+
+            <!-- Payables & Receivables -->
+            <div class="dash-card c-debt">
+                <h3>To Receive (Debtors)</h3>
+                <div class="amt" id="dDebtors">₹0.00</div>
+            </div>
+            <div class="dash-card c-cred">
+                <h3>To Pay (Creditors)</h3>
+                <div class="amt" id="dCreditors">₹0.00</div>
+            </div>
+            
+            <!-- Summary Stats -->
+            <div class="dash-card" style="grid-column: span 2; display: flex; justify-content: space-around; background: #e8eaed;">
+                <div><strong>Total Sales:</strong> <span id="sSales">₹0.00</span></div>
+                <div><strong>Total Purchases:</strong> <span id="sPurchases">₹0.00</span></div>
+                <div><strong>Personal Drawings:</strong> <span id="sPersonal">₹0.00</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
+        authDomain: "glacierpos-35f4c.firebaseapp.com",
+        projectId: "glacierpos-35f4c",
+        storageBucket: "glacierpos-35f4c.firebasestorage.app",
+        messagingSenderId: "46444555909",
+        appId: "1:46444555909:web:50430006771bd52eaf83ec"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Dynamic UI adjustments
+    window.toggleFields = function() {
+        const type = document.getElementById('tType').value;
+        const modeGroup = document.getElementById('tMode');
+        const partyLabel = document.getElementById('partyLabel');
+
+        // Reset options
+        modeGroup.innerHTML = `
+            <option value="Cash">Cash (Galla)</option>
+            <option value="Bank">Bank / UPI</option>
+            <option value="Credit">Unpaid (Add to Credit Book)</option>
+        `;
+
+        if (type === 'Receipt' || type === 'Payment') {
+            partyLabel.innerText = type === 'Receipt' ? "Received From (Customer)" : "Paid To (Supplier)";
+            // You can't have a "Credit" mode for receiving/paying existing credit
+            modeGroup.innerHTML = `
+                <option value="Cash">Cash</option>
+                <option value="Bank">Bank / UPI</option>
+            `;
+        } else if (type === 'Expense_Personal' || type === 'Expense_Biz') {
+            partyLabel.innerText = "Expense Details / Paid To";
+        } else {
+            partyLabel.innerText = type === 'Sale' ? "Customer Name" : "Supplier Name";
+        }
+    };
+
+    window.saveTransaction = async function() {
+        const type = document.getElementById('tType').value;
+        const amount = parseFloat(document.getElementById('tAmount').value);
+        const mode = document.getElementById('tMode').value;
+        const party = document.getElementById('tParty').value || "Cash";
+        const ref = document.getElementById('tRef').value;
+
+        if (!amount || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "⏳ Saving...";
+        btn.disabled = true;
+
+        const voucherData = {
+            date: new Date().toISOString(),
+            type: type,
+            amount: amount,
+            mode: mode,
+            partyName: party,
+            reference: ref
+        };
+
+        try {
+            // Save to a unified 'vouchers' collection
+            await addDoc(collection(db, "vouchers"), voucherData);
+            
+            document.getElementById('tAmount').value = "";
+            document.getElementById('tParty').value = "";
+            document.getElementById('tRef').value = "";
+            
+            btn.innerText = "💾 Save Transaction";
+            btn.disabled = false;
+            
+            // Instantly refresh dashboard
+            loadDashboard();
+            alert("Transaction Saved!");
+        } catch (error) {
+            console.error("Error: ", error);
+            alert("Failed to save.");
+            btn.innerText = "💾 Save Transaction";
+            btn.disabled = false;
+        }
+    };
+
+    window.loadDashboard = async function() {
+        let cash = 0, bank = 0, debtors = 0, creditors = 0;
+        let tSales = 0, tPurch = 0, tBizExp = 0, tPersonal = 0;
+
+        const snapshot = await getDocs(collection(db, "vouchers"));
+        
+        snapshot.forEach((doc) => {
+            const v = doc.data();
+            const amt = v.amount;
+
+            // 1. Calculate P&L Totals
+            if (v.type === 'Sale') tSales += amt;
+            if (v.type === 'Purchase') tPurch += amt;
+            if (v.type === 'Expense_Biz') tBizExp += amt;
+            if (v.type === 'Expense_Personal') tPersonal += amt;
+
+            // 2. Calculate Debtors & Creditors
+            if (v.mode === 'Credit') {
+                if (v.type === 'Sale') debtors += amt;
+                if (v.type === 'Purchase') creditors += amt;
+                if (v.type === 'Expense_Biz') creditors += amt;
+            }
+            if (v.type === 'Receipt') debtors -= amt; // Paying off debt
+            if (v.type === 'Payment') creditors -= amt; // Paying off credit
+
+            // 3. Calculate Liquidity (Cash & Bank)
+            if (v.mode === 'Cash') {
+                if (v.type === 'Sale' || v.type === 'Receipt') cash += amt;
+                if (v.type === 'Purchase' || v.type === 'Expense_Biz' || v.type === 'Expense_Personal' || v.type === 'Payment') cash -= amt;
+            }
+            if (v.mode === 'Bank') {
+                if (v.type === 'Sale' || v.type === 'Receipt') bank += amt;
+                if (v.type === 'Purchase' || v.type === 'Expense_Biz' || v.type === 'Expense_Personal' || v.type === 'Payment') bank -= amt;
+            }
+        });
+
+        const profit = tSales - tPurch - tBizExp;
+
+        // Update UI
+        document.getElementById('dProfit').innerText = `₹${profit.toFixed(2)}`;
+        document.getElementById('dProfit').style.color = profit >= 0 ? '#2ecc71' : '#e74c3c';
+        
+        document.getElementById('dCash').innerText = `₹${cash.toFixed(2)}`;
+        document.getElementById('dBank').innerText = `₹${bank.toFixed(2)}`;
+        
+        // Use Math.max to prevent negative debts showing weirdly if overpaid
+        document.getElementById('dDebtors').innerText = `₹${Math.max(0, debtors).toFixed(2)}`;
+        document.getElementById('dCreditors').innerText = `₹${Math.max(0, creditors).toFixed(2)}`;
+        
+        document.getElementById('sSales').innerText = `₹${tSales.toFixed(2)}`;
+        document.getElementById('sPurchases').innerText = `₹${tPurch.toFixed(2)}`;
+        document.getElementById('sPersonal').innerText = `₹${tPersonal.toFixed(2)}`;
+    };
+
+    // Load data on start
+    window.onload = loadDashboard;
+</script>
+
+</body>
+</html>
