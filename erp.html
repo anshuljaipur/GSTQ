@@ -516,17 +516,41 @@
     window.calculateDashboard = async function() {
         if(window.allVouchers.length === 0) await fetchCoreData();
         let cash = 0, bank = 0, dr = 0, cr = 0, sales = 0, purch = 0;
+        
         window.allVouchers.forEach(v => {
-            if(v.type === 'Sale') sales += v.amount; if(v.type === 'Purchase') purch += v.amount;
-            if(v.mode === 'Credit') { if(v.type === 'Sale') dr += v.amount; if(v.type === 'Purchase') cr += v.amount; }
-            if(v.type === 'Receipt') dr -= v.amount; if(v.type === 'Payment') cr -= v.amount;
-            if(v.mode === 'Cash') { if(v.type === 'Sale' || v.type === 'Receipt') cash += v.amount; if(v.type === 'Purchase' || v.type === 'Payment') cash -= v.amount; }
-            if(v.mode === 'Bank') { if(v.type === 'Sale' || v.type === 'Receipt') bank += v.amount; if(v.type === 'Purchase' || v.type === 'Payment') bank -= v.amount; }
-            if(v.type === 'Contra') { if(v.mode === 'CashToBank') { cash -= v.amount; bank += v.amount; } if(v.mode === 'BankToCash') { bank -= v.amount; cash += v.amount; } }
+            // FIX: Safely grab the amount from either old bills or new bills!
+            const amt = parseFloat(v.amount || v.totalAmount || 0);
+
+            if(v.type === 'Sale') sales += amt; 
+            if(v.type === 'Purchase') purch += amt;
+            
+            if(v.mode === 'Credit') { 
+                if(v.type === 'Sale') dr += amt; 
+                if(v.type === 'Purchase') cr += amt; 
+            }
+            if(v.type === 'Receipt') dr -= amt; 
+            if(v.type === 'Payment') cr -= amt;
+
+            if(v.mode === 'Cash') { 
+                if(v.type === 'Sale' || v.type === 'Receipt') cash += amt; 
+                if(v.type === 'Purchase' || v.type === 'Payment') cash -= amt; 
+            }
+            if(v.mode === 'Bank') { 
+                if(v.type === 'Sale' || v.type === 'Receipt') bank += amt; 
+                if(v.type === 'Purchase' || v.type === 'Payment') bank -= amt; 
+            }
+            if(v.type === 'Contra') { 
+                if(v.mode === 'CashToBank') { cash -= amt; bank += amt; } 
+                if(v.mode === 'BankToCash') { bank -= amt; cash += amt; } 
+            }
         });
-        document.getElementById('dCash').innerText = `₹${cash.toFixed(2)}`; document.getElementById('dBank').innerText = `₹${bank.toFixed(2)}`;
-        document.getElementById('dDebt').innerText = `₹${Math.max(0, dr).toFixed(2)}`; document.getElementById('dCred').innerText = `₹${Math.max(0, cr).toFixed(2)}`;
-        document.getElementById('dSales').innerText = `₹${sales.toFixed(2)}`; document.getElementById('dPurch').innerText = `₹${purch.toFixed(2)}`;
+
+        document.getElementById('dCash').innerText = `₹${cash.toFixed(2)}`; 
+        document.getElementById('dBank').innerText = `₹${bank.toFixed(2)}`;
+        document.getElementById('dDebt').innerText = `₹${Math.max(0, dr).toFixed(2)}`; 
+        document.getElementById('dCred').innerText = `₹${Math.max(0, cr).toFixed(2)}`;
+        document.getElementById('dSales').innerText = `₹${sales.toFixed(2)}`; 
+        document.getElementById('dPurch').innerText = `₹${purch.toFixed(2)}`;
     };
 
     window.onload = async function() { await fetchCoreData(); calculateDashboard(); };
