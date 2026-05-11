@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlacierPOS - GST Dashboard</title>
+    <title>GlacierPOS - GST Dashboard & Filing</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         h1 { color: #2c3e50; border-bottom: 3px solid #f39c12; padding-bottom: 10px; margin-bottom: 30px; text-align: center;}
@@ -23,17 +23,28 @@
         .net-card { border-top: 5px solid #e74c3c; background-color: #fdf5f5;}
         .net-card .amount { color: #c0392b; }
 
-        .btn-refresh { background-color: #f39c12; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .controls { display: flex; gap: 15px; margin-bottom: 20px; }
+        button { border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: background 0.3s;}
+        .btn-refresh { background-color: #f39c12; color: white; }
         .btn-refresh:hover { background-color: #e67e22; }
+        .btn-json { background-color: #8e44ad; color: white; }
+        .btn-json:hover { background-color: #732d91; }
         
         .details { font-size: 14px; color: #555; line-height: 1.6; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px;}
+        
+        .json-box { width: 100%; max-width: 900px; background: #2c3e50; color: #a6e22e; padding: 20px; border-radius: 12px; margin-top: 30px; display: none; overflow-x: auto; box-sizing: border-box;}
+        .json-box h3 { color: #fff; margin-top: 0; border-bottom: 1px solid #555; padding-bottom: 10px; }
+        pre { font-family: 'Courier New', Courier, monospace; font-size: 14px; margin: 0; }
     </style>
 </head>
 <body>
 
-    <h1>📊 GST Reconciliation Report</h1>
+    <h1>📊 GST Reconciliation & Filing</h1>
     
-    <button class="btn-refresh" onclick="loadData()">🔄 Fetch Latest Data</button>
+    <div class="controls">
+        <button class="btn-refresh" onclick="loadData()">🔄 Fetch Latest Data</button>
+        <button class="btn-json" onclick="generateJSON()">📤 Generate GSTR-3B JSON</button>
+    </div>
 
     <div class="dashboard">
         <!-- OUTPUT TAX (SALES) -->
@@ -64,6 +75,12 @@
         </div>
     </div>
 
+    <!-- JSON OUTPUT AREA -->
+    <div class="json-box" id="jsonBox">
+        <h3>Government API Payload (GSTR-3B)</h3>
+        <pre id="jsonOutput"></pre>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -81,60 +98,67 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // We store the data globally so the JSON button can use it without re-fetching
+        window.gstData = {
+            salesTaxableVal: 0, outCGST: 0, outSGST: 0, outIGST: 0,
+            itcCGST: 0, itcSGST: 0, itcIGST: 0
+        };
+
         window.loadData = async function() {
             const btn = document.querySelector('.btn-refresh');
             btn.innerText = "⏳ Calculating...";
+            
+            // Reset totals before calculation
+            window.gstData = { salesTaxableVal: 0, outCGST: 0, outSGST: 0, outIGST: 0, itcCGST: 0, itcSGST: 0, itcIGST: 0 };
 
             try {
                 // 1. Fetch Sales (Output Tax)
-                let outCGST = 0, outSGST = 0, outIGST = 0;
                 const salesSnapshot = await getDocs(collection(db, "invoices"));
                 salesSnapshot.forEach((doc) => {
                     const data = doc.data();
-                    outCGST += data.cgst || 0;
-                    outSGST += data.sgst || 0;
-                    outIGST += data.igst || 0;
+                    window.gstData.salesTaxableVal += data.taxableValue || 0;
+                    window.gstData.outCGST += data.cgst || 0;
+                    window.gstData.outSGST += data.sgst || 0;
+                    window.gstData.outIGST += data.igst || 0;
                 });
-                const totalOutput = outCGST + outSGST + outIGST;
+                const totalOutput = window.gstData.outCGST + window.gstData.outSGST + window.gstData.outIGST;
 
                 // 2. Fetch Purchases (Input Tax Credit)
-                let itcCGST = 0, itcSGST = 0, itcIGST = 0;
                 const purchasesSnapshot = await getDocs(collection(db, "purchases"));
                 purchasesSnapshot.forEach((doc) => {
                     const data = doc.data();
-                    // ONLY add to ITC if the item was marked eligible!
                     if (data.itcEligible) {
-                        itcCGST += data.cgstPaid || 0;
-                        itcSGST += data.sgstPaid || 0;
-                        itcIGST += data.igstPaid || 0;
+                        window.gstData.itcCGST += data.cgstPaid || 0;
+                        window.gstData.itcSGST += data.sgstPaid || 0;
+                        window.gstData.itcIGST += data.igstPaid || 0;
                     }
                 });
-                const totalITC = itcCGST + itcSGST + itcIGST;
+                const totalITC = window.gstData.itcCGST + window.gstData.itcSGST + window.gstData.itcIGST;
 
-                // 3. Calculate Net Payable (Output - ITC)
-                // We use Math.max to ensure it doesn't show negative tax payable.
-                // If ITC is higher, the payable is 0 (ITC carried forward).
-                const netCGST = Math.max(0, outCGST - itcCGST);
-                const netSGST = Math.max(0, outSGST - itcSGST);
-                const netIGST = Math.max(0, outIGST - itcIGST);
+                // 3. Calculate Net Payable
+                const netCGST = Math.max(0, window.gstData.outCGST - window.gstData.itcCGST);
+                const netSGST = Math.max(0, window.gstData.outSGST - window.gstData.itcSGST);
+                const netIGST = Math.max(0, window.gstData.outIGST - window.gstData.itcIGST);
                 const totalNet = netCGST + netSGST + netIGST;
 
                 // 4. Update the Screen
                 document.getElementById('outTotal').innerText = `₹${totalOutput.toFixed(2)}`;
-                document.getElementById('outDetails').innerHTML = `CGST: ₹${outCGST.toFixed(2)} <br> SGST: ₹${outSGST.toFixed(2)} <br> IGST: ₹${outIGST.toFixed(2)}`;
+                document.getElementById('outDetails').innerHTML = `Taxable Sales: ₹${window.gstData.salesTaxableVal.toFixed(2)}<hr style="border:0; border-top:1px dashed #ccc; margin:5px 0;">CGST: ₹${window.gstData.outCGST.toFixed(2)} <br> SGST: ₹${window.gstData.outSGST.toFixed(2)} <br> IGST: ₹${window.gstData.outIGST.toFixed(2)}`;
 
                 document.getElementById('itcTotal').innerText = `₹${totalITC.toFixed(2)}`;
-                document.getElementById('itcDetails').innerHTML = `CGST: ₹${itcCGST.toFixed(2)} <br> SGST: ₹${itcSGST.toFixed(2)} <br> IGST: ₹${itcIGST.toFixed(2)}`;
+                document.getElementById('itcDetails').innerHTML = `CGST: ₹${window.gstData.itcCGST.toFixed(2)} <br> SGST: ₹${window.gstData.itcSGST.toFixed(2)} <br> IGST: ₹${window.gstData.itcIGST.toFixed(2)}`;
 
                 document.getElementById('netTotal').innerText = `₹${totalNet.toFixed(2)}`;
                 
                 if (totalITC > totalOutput) {
-                    document.getElementById('netDetails').innerHTML = `<span style="color: #27ae60; font-weight: bold;">Excess ITC carried forward to next month!</span>`;
+                    document.getElementById('netDetails').innerHTML = `<span style="color: #27ae60; font-weight: bold;">Excess ITC carried forward!</span>`;
                 } else {
                     document.getElementById('netDetails').innerHTML = `Pay via PMT-06 Challan:<br> CGST: ₹${netCGST.toFixed(2)} <br> SGST: ₹${netSGST.toFixed(2)} <br> IGST: ₹${netIGST.toFixed(2)}`;
                 }
 
                 btn.innerText = "🔄 Fetch Latest Data";
+                // Hide JSON box if it was open from a previous generation
+                document.getElementById('jsonBox').style.display = "none";
 
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -143,44 +167,53 @@
             }
         };
 
+        // --- NEW JSON GENERATOR FEATURE ---
+        window.generateJSON = function() {
+            // Check if data is loaded first
+            if (window.gstData.salesTaxableVal === 0 && window.gstData.itcCGST === 0) {
+                alert("Please click 'Fetch Latest Data' first so the system can calculate your totals.");
+                return;
+            }
+
+            // Construct the exact GSTR-3B Payload
+            const gstr3bPayload = {
+                "gstin": "08AAAAA0000A1Z5", // Replace with your actual GSTIN
+                "ret_period": "062026",       // Target filing quarter
+                
+                "sup_details": {
+                    "osup_det": {
+                        "txval": parseFloat(window.gstData.salesTaxableVal.toFixed(2)),
+                        "iamt": parseFloat(window.gstData.outIGST.toFixed(2)),
+                        "camt": parseFloat(window.gstData.outCGST.toFixed(2)),
+                        "samt": parseFloat(window.gstData.outSGST.toFixed(2)),
+                        "csamt": 0.00
+                    }
+                },
+                
+                "itc_elg": {
+                    "itc_avl": [
+                        {
+                            "ty": "ALL_OTHER_ITC",
+                            "iamt": parseFloat(window.gstData.itcIGST.toFixed(2)),
+                            "camt": parseFloat(window.gstData.itcCGST.toFixed(2)),
+                            "samt": parseFloat(window.gstData.itcSGST.toFixed(2)),
+                            "csamt": 0.00
+                        }
+                    ]
+                }
+            };
+
+            // Display the payload on screen
+            const jsonString = JSON.stringify(gstr3bPayload, null, 4);
+            document.getElementById('jsonOutput').innerText = jsonString;
+            document.getElementById('jsonBox').style.display = "block";
+            
+            // Scroll down to show the user the new box
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        };
+
         // Automatically fetch data when page loads
         window.onload = loadData;
-    function generateGSTR3BPayload(salesTotalTaxable, outCGST, outSGST, outIGST, itcCGST, itcSGST, itcIGST) {
-    
-    // Construct the JSON exactly as the API expects it
-    const gstr3bPayload = {
-        "gstin": "YOUR_ACTUAL_GSTIN", // Pull this from user settings
-        "ret_period": "062026",       // E.g., June 2026
-        
-        "sup_details": {
-            // Section 3.1: Output Tax
-            "osup_det": {
-                "txval": parseFloat(salesTotalTaxable.toFixed(2)),
-                "iamt": parseFloat(outIGST.toFixed(2)),
-                "camt": parseFloat(outCGST.toFixed(2)),
-                "samt": parseFloat(outSGST.toFixed(2)),
-                "csamt": 0.00
-            }
-        },
-        
-        "itc_elg": {
-            // Section 4: Eligible Input Tax Credit
-            "itc_avl": [
-                {
-                    "ty": "ALL_OTHER_ITC",
-                    "iamt": parseFloat(itcIGST.toFixed(2)),
-                    "camt": parseFloat(itcCGST.toFixed(2)),
-                    "samt": parseFloat(itcSGST.toFixed(2)),
-                    "csamt": 0.00
-                }
-            ]
-        }
-    };
-
-    return JSON.stringify(gstr3bPayload, null, 2);
-}
     </script>
-
-    
 </body>
 </html>
