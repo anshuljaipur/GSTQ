@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlacierPOS - GST Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #f39c12; padding-bottom: 10px; margin-bottom: 30px; text-align: center;}
+        
+        .dashboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 900px; width: 100%; }
+        
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); flex: 1; min-width: 250px; }
+        .card h3 { margin-top: 0; color: #7f8c8d; font-size: 16px; text-transform: uppercase; }
+        .card .amount { font-size: 28px; font-weight: bold; margin: 10px 0; }
+        
+        .sales-card { border-top: 5px solid #3498db; }
+        .sales-card .amount { color: #2980b9; }
+        
+        .itc-card { border-top: 5px solid #27ae60; }
+        .itc-card .amount { color: #27ae60; }
+        
+        .net-card { border-top: 5px solid #e74c3c; background-color: #fdf5f5;}
+        .net-card .amount { color: #c0392b; }
+
+        .btn-refresh { background-color: #f39c12; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-refresh:hover { background-color: #e67e22; }
+        
+        .details { font-size: 14px; color: #555; line-height: 1.6; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px;}
+    </style>
+</head>
+<body>
+
+    <h1>📊 GST Reconciliation Report</h1>
+    
+    <button class="btn-refresh" onclick="loadData()">🔄 Fetch Latest Data</button>
+
+    <div class="dashboard">
+        <!-- OUTPUT TAX (SALES) -->
+        <div class="card sales-card">
+            <h3>Total Output Tax (Sales)</h3>
+            <div class="amount" id="outTotal">₹0.00</div>
+            <div class="details" id="outDetails">
+                CGST: ₹0.00 <br> SGST: ₹0.00 <br> IGST: ₹0.00
+            </div>
+        </div>
+
+        <!-- INPUT TAX CREDIT (PURCHASES) -->
+        <div class="card itc-card">
+            <h3>Available ITC (Purchases)</h3>
+            <div class="amount" id="itcTotal">₹0.00</div>
+            <div class="details" id="itcDetails">
+                CGST: ₹0.00 <br> SGST: ₹0.00 <br> IGST: ₹0.00
+            </div>
+        </div>
+
+        <!-- NET PAYABLE -->
+        <div class="card net-card">
+            <h3>Net GST Payable (PMT-06)</h3>
+            <div class="amount" id="netTotal">₹0.00</div>
+            <div class="details" id="netDetails">
+                Click "Fetch Latest Data" to calculate.
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your exact Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
+            authDomain: "glacierpos-35f4c.firebaseapp.com",
+            projectId: "glacierpos-35f4c",
+            storageBucket: "glacierpos-35f4c.firebasestorage.app",
+            messagingSenderId: "46444555909",
+            appId: "1:46444555909:web:50430006771bd52eaf83ec"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.loadData = async function() {
+            const btn = document.querySelector('.btn-refresh');
+            btn.innerText = "⏳ Calculating...";
+
+            try {
+                // 1. Fetch Sales (Output Tax)
+                let outCGST = 0, outSGST = 0, outIGST = 0;
+                const salesSnapshot = await getDocs(collection(db, "invoices"));
+                salesSnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    outCGST += data.cgst || 0;
+                    outSGST += data.sgst || 0;
+                    outIGST += data.igst || 0;
+                });
+                const totalOutput = outCGST + outSGST + outIGST;
+
+                // 2. Fetch Purchases (Input Tax Credit)
+                let itcCGST = 0, itcSGST = 0, itcIGST = 0;
+                const purchasesSnapshot = await getDocs(collection(db, "purchases"));
+                purchasesSnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // ONLY add to ITC if the item was marked eligible!
+                    if (data.itcEligible) {
+                        itcCGST += data.cgstPaid || 0;
+                        itcSGST += data.sgstPaid || 0;
+                        itcIGST += data.igstPaid || 0;
+                    }
+                });
+                const totalITC = itcCGST + itcSGST + itcIGST;
+
+                // 3. Calculate Net Payable (Output - ITC)
+                // We use Math.max to ensure it doesn't show negative tax payable.
+                // If ITC is higher, the payable is 0 (ITC carried forward).
+                const netCGST = Math.max(0, outCGST - itcCGST);
+                const netSGST = Math.max(0, outSGST - itcSGST);
+                const netIGST = Math.max(0, outIGST - itcIGST);
+                const totalNet = netCGST + netSGST + netIGST;
+
+                // 4. Update the Screen
+                document.getElementById('outTotal').innerText = `₹${totalOutput.toFixed(2)}`;
+                document.getElementById('outDetails').innerHTML = `CGST: ₹${outCGST.toFixed(2)} <br> SGST: ₹${outSGST.toFixed(2)} <br> IGST: ₹${outIGST.toFixed(2)}`;
+
+                document.getElementById('itcTotal').innerText = `₹${totalITC.toFixed(2)}`;
+                document.getElementById('itcDetails').innerHTML = `CGST: ₹${itcCGST.toFixed(2)} <br> SGST: ₹${itcSGST.toFixed(2)} <br> IGST: ₹${itcIGST.toFixed(2)}`;
+
+                document.getElementById('netTotal').innerText = `₹${totalNet.toFixed(2)}`;
+                
+                if (totalITC > totalOutput) {
+                    document.getElementById('netDetails').innerHTML = `<span style="color: #27ae60; font-weight: bold;">Excess ITC carried forward to next month!</span>`;
+                } else {
+                    document.getElementById('netDetails').innerHTML = `Pay via PMT-06 Challan:<br> CGST: ₹${netCGST.toFixed(2)} <br> SGST: ₹${netSGST.toFixed(2)} <br> IGST: ₹${netIGST.toFixed(2)}`;
+                }
+
+                btn.innerText = "🔄 Fetch Latest Data";
+
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+                alert("Could not load data. Check console.");
+                btn.innerText = "🔄 Try Again";
+            }
+        };
+
+        // Automatically fetch data when page loads
+        window.onload = loadData;
+    </script>
+</body>
+</html>
