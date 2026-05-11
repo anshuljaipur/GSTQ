@@ -464,12 +464,16 @@
 
     window.runReportLogic = function() {
         const type = window.currentReport; const c = document.getElementById('reportContainer'); let html = "<table><thead><tr>";
+        
         if(type === 'PNL') {
             let sales = 0, cogs = 0, exp = 0;
             window.allVouchers.forEach(v => {
-                if(v.type === 'Sale') sales += v.amount; if(v.type === 'Return_Sale') sales -= v.amount;
-                if(v.type === 'Purchase') cogs += v.amount;
-                if(v.type === 'Payment' && window.masterParties.find(p => p.name === v.party)?.type === 'Expense') exp += v.amount;
+                const amt = parseFloat(v.amount || v.totalAmount || 0); // FIX
+                
+                if(v.type === 'Sale') sales += amt; 
+                if(v.type === 'Return_Sale') sales -= amt;
+                if(v.type === 'Purchase') cogs += amt;
+                if(v.type === 'Payment' && window.masterParties.find(p => p.name === v.party)?.type === 'Expense') exp += amt;
             });
             let profit = sales - cogs - exp;
             html = `<table style="width:500px;"><tr><th>Particulars</th><th>Amount (₹)</th></tr><tr><td>Gross Sales</td><td>${sales.toFixed(2)}</td></tr><tr><td>Cost of Purchases</td><td>${cogs.toFixed(2)}</td></tr><tr><td>Indirect Expenses</td><td>${exp.toFixed(2)}</td></tr><tr style="font-weight:bold; background:#eafaf1; color:${profit>=0?'#27ae60':'#c0392b'};"><td>NET PROFIT / (LOSS)</td><td>${profit.toFixed(2)}</td></tr></table>`;
@@ -478,9 +482,11 @@
             html += "<th>Date</th><th>Type</th><th>Ref</th><th>In (+)</th><th>Out (-)</th></tr></thead><tbody>";
             let tIn = 0, tOut = 0;
             window.allVouchers.forEach(v => {
+                const amt = parseFloat(v.amount || v.totalAmount || 0); // FIX
+
                 if(v.mode === 'Cash' || v.mode === 'Bank' || v.type === 'Contra') {
-                    if(v.type === 'Sale' || v.type === 'Receipt') { tIn += v.amount; html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${v.party||v.remarks}</td><td>${v.amount}</td><td></td></tr>`; }
-                    if(v.type === 'Purchase' || v.type === 'Payment') { tOut += v.amount; html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${v.party||v.remarks}</td><td></td><td>${v.amount}</td></tr>`; }
+                    if(v.type === 'Sale' || v.type === 'Receipt') { tIn += amt; html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${v.party||v.remarks}</td><td>${amt}</td><td></td></tr>`; }
+                    if(v.type === 'Purchase' || v.type === 'Payment') { tOut += amt; html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${v.party||v.remarks}</td><td></td><td>${amt}</td></tr>`; }
                 }
             });
             html += `</tbody></table><h3>Net Change: ₹${(tIn - tOut).toFixed(2)}</h3>`;
@@ -502,9 +508,11 @@
             html += "<th>Date</th><th>Type</th><th>Dr</th><th>Cr</th><th>Bal</th></tr></thead><tbody>";
             let bal = 0;
             window.allVouchers.filter(v => v.party === p || v.mode === p || (v.type==='Contra' && v.mode.includes(p))).forEach(v => {
+                const amt = parseFloat(v.amount || v.totalAmount || 0); // FIX
                 let dr = 0, cr = 0;
-                if(v.type === 'Sale' || v.type === 'Payment' || (v.mode === 'CashToBank' && p === 'Bank')) dr = v.amount;
-                if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && p === 'Cash')) cr = v.amount;
+                
+                if(v.type === 'Sale' || v.type === 'Payment' || (v.mode === 'CashToBank' && p === 'Bank')) dr = amt;
+                if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && p === 'Cash')) cr = amt;
                 bal += (dr - cr);
                 html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${dr||''}</td><td>${cr||''}</td><td>${Math.abs(bal)} ${bal>0?'Dr':'Cr'}</td></tr>`;
             });
