@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlacierPOS - Purchase & ITC Tracker</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; border-top: 5px solid #27ae60; }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #27ae60; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: #34495e; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #dcdde1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .checkbox-group { display: flex; align-items: center; margin-bottom: 15px; }
+        .checkbox-group input { width: auto; margin-right: 10px; transform: scale(1.3); }
+        button { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
+        button:hover { background-color: #2ecc71; }
+        .output { margin-top: 20px; padding: 15px; border-radius: 8px; background-color: #eafaf1; border-left: 5px solid #27ae60; display: none; }
+        .success-text { color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📦 Log Purchase / Expense</h2>
+    
+    <div class="form-group">
+        <label>Supplier Location</label>
+        <select id="location">
+            <option value="local">Inside Rajasthan (CGST+SGST)</option>
+            <option value="interstate">Outside Rajasthan (IGST)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Supplier GSTIN</label>
+        <input type="text" id="supplierGstin" placeholder="e.g. Supplier GST Number">
+    </div>
+
+    <div class="form-group">
+        <label>Supplier Bill / Invoice No.</label>
+        <input type="text" id="billNo" placeholder="e.g. INV-8823">
+    </div>
+
+    <div class="form-group">
+        <label>Item / Expense Detail</label>
+        <input type="text" id="itemName" placeholder="e.g. Amul Milk / Paper Cups">
+    </div>
+
+    <div class="form-group">
+        <label>Taxable Amount (Base Price)</label>
+        <input type="number" id="amount" placeholder="0.00">
+    </div>
+
+    <div class="form-group">
+        <label>GST Paid (%)</label>
+        <select id="rate">
+            <option value="5">5%</option>
+            <option value="12">12%</option>
+            <option value="18" selected>18%</option>
+            <option value="28">28%</option>
+        </select>
+    </div>
+
+    <div class="checkbox-group">
+        <input type="checkbox" id="itcEligible" checked>
+        <label for="itcEligible" style="margin-bottom: 0;">Claim Input Tax Credit (ITC)?</label>
+    </div>
+
+    <button onclick="savePurchase()">🧾 Save Purchase</button>
+
+    <div id="resultBox" class="output"></div>
+</div>
+
+<!-- FIREBASE INTEGRATION -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Your exact Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
+        authDomain: "glacierpos-35f4c.firebaseapp.com",
+        projectId: "glacierpos-35f4c",
+        storageBucket: "glacierpos-35f4c.firebasestorage.app",
+        messagingSenderId: "46444555909",
+        appId: "1:46444555909:web:50430006771bd52eaf83ec"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.savePurchase = async function() {
+        const item = document.getElementById('itemName').value;
+        const gstin = document.getElementById('supplierGstin').value;
+        const billNo = document.getElementById('billNo').value;
+        const basePrice = parseFloat(document.getElementById('amount').value);
+        const gstRate = parseFloat(document.getElementById('rate').value);
+        const loc = document.getElementById('location').value;
+        const isEligible = document.getElementById('itcEligible').checked;
+
+        if (!item || !basePrice || !billNo) {
+            alert("Please enter the Bill No, Item Detail, and Amount.");
+            return;
+        }
+
+        // --- ITC CALCULATIONS ---
+        const totalTaxPaid = (basePrice * gstRate) / 100;
+        const totalPaidToSupplier = basePrice + totalTaxPaid;
+        
+        let cgst = 0, sgst = 0, igst = 0;
+
+        if (loc === "local") {
+            cgst = totalTaxPaid / 2;
+            sgst = totalTaxPaid / 2;
+        } else {
+            igst = totalTaxPaid;
+        }
+
+        const purchaseData = {
+            itemName: item,
+            supplierGstin: gstin,
+            billNumber: billNo,
+            taxableValue: basePrice,
+            cgstPaid: cgst,
+            sgstPaid: sgst,
+            igstPaid: igst,
+            totalBillValue: totalPaidToSupplier,
+            itcEligible: isEligible, // Important for reducing final tax liability
+            date: new Date().toISOString(),
+            quarter: "Q1-2026"
+        };
+
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = "block";
+        resultBox.innerHTML = "⏳ Saving to GlacierPOS Database...";
+
+        try {
+            // NOTE: We are saving to a NEW collection called "purchases"
+            const docRef = await addDoc(collection(db, "purchases"), purchaseData);
+            
+            let itcMessage = isEligible 
+                ? `<span style="color: green;">✔ ITC Available: ₹${totalTaxPaid.toFixed(2)}</span>` 
+                : `<span style="color: red;">✖ ITC Not Claimed</span>`;
+
+            resultBox.innerHTML = `
+                <span class="success-text">✔ Expense Logged!</span><br>
+                <small>Ref: ${docRef.id}</small><hr>
+                Supplier Bill: ${billNo}<br>
+                Tax Paid: ${loc === 'local' ? `CGST: ${cgst.toFixed(2)}, SGST: ${sgst.toFixed(2)}` : `IGST: ${igst.toFixed(2)}`}<br>
+                ${itcMessage}<br>
+                <strong>Total Paid: ₹${totalPaidToSupplier.toFixed(2)}</strong>
+            `;
+            
+            // Clear inputs for next bill
+            document.getElementById('itemName').value = "";
+            document.getElementById('amount').value = "";
+            document.getElementById('billNo').value = "";
+
+        } catch (error) {
+            console.error("Error: ", error);
+            resultBox.innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
+        }
+    };
+</script>
+
+</body>
+</html>
