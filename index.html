@@ -4,42 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GlacierPOS - GST Billing</title>
-    <!-- Simple styling for your shop -->
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #1a73e8; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { color: #2c3e50; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        button:hover { background: #1557b0; }
-        .invoice-box { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 5px solid #1a73e8; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: #34495e; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #dcdde1; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 15px; background-color: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
+        button:hover { background-color: #2980b9; }
+        .output { margin-top: 20px; padding: 15px; border-radius: 8px; background-color: #ebf3f9; border-left: 5px solid #3498db; display: none; }
+        .success-text { color: #27ae60; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>GlacierPOS: New Invoice</h2>
+<div class="card">
+    <h2>🍦 GlacierPOS</h2>
     
     <div class="form-group">
-        <label>Customer GSTIN (Leave blank for B2C)</label>
-        <input type="text" id="custGstin" placeholder="08AAAAA0000A1Z5">
+        <label>Customer Location</label>
+        <select id="location">
+            <option value="local">Inside Rajasthan (CGST+SGST)</option>
+            <option value="interstate">Outside Rajasthan (IGST)</option>
+        </select>
     </div>
 
     <div class="form-group">
         <label>Item Name</label>
-        <input type="text" id="itemName" placeholder="Ice Cream / Bakery Item">
+        <input type="text" id="itemName" placeholder="e.g. Vanilla Scoop / Cake">
     </div>
 
     <div class="form-group">
-        <label>Amount (Before Tax)</label>
-        <input type="number" id="baseAmount" placeholder="0.00">
+        <label>HSN Code</label>
+        <input type="text" id="hsnCode" placeholder="e.g. 2105">
     </div>
 
     <div class="form-group">
-        <label>GST Rate</label>
-        <select id="gstRate">
+        <label>Sale Amount (Without Tax)</label>
+        <input type="number" id="amount" placeholder="0.00">
+    </div>
+
+    <div class="form-group">
+        <label>GST Rate (%)</label>
+        <select id="rate">
             <option value="5">5%</option>
             <option value="12">12%</option>
             <option value="18" selected>18%</option>
@@ -47,76 +55,93 @@
         </select>
     </div>
 
-    <button onclick="saveInvoice()">Save & Calculate Bill</button>
+    <button onclick="saveInvoice()">💾 Save & Calculate Bill</button>
 
-    <div id="displayArea" class="invoice-box" style="display:none;"></div>
+    <div id="resultBox" class="output"></div>
 </div>
 
-<!-- FIREBASE SCRIPTS (The Brains) -->
+<!-- FIREBASE INTEGRATION -->
 <script type="module">
-<script type="module">
-  // 1. We use web URLs (CDNs) so the browser can find Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 2. Your specific GlacierPOS configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
-    authDomain: "glacierpos-35f4c.firebaseapp.com",
-    projectId: "glacierpos-35f4c",
-    storageBucket: "glacierpos-35f4c.firebasestorage.app",
-    messagingSenderId: "46444555909",
-    appId: "1:46444555909:web:50430006771bd52eaf83ec"
-  };
+    // Your exact Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
+        authDomain: "glacierpos-35f4c.firebaseapp.com",
+        projectId: "glacierpos-35f4c",
+        storageBucket: "glacierpos-35f4c.firebasestorage.app",
+        messagingSenderId: "46444555909",
+        appId: "1:46444555909:web:50430006771bd52eaf83ec"
+    };
 
-  // 3. Initialize Firebase and the Database (Firestore)
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  // 4. Attach the function to 'window' so the HTML button can "see" it
-  window.saveInvoice = async function() {
-      const base = parseFloat(document.getElementById('baseAmount').value);
-      const rate = parseFloat(document.getElementById('gstRate').value);
-      const itemName = document.getElementById('itemName').value;
-      const gstin = document.getElementById('custGstin').value || "B2C / Cash";
-      
-      if (!base || !itemName) {
-          alert("Please enter both Item Name and Amount!");
-          return;
-      }
+    // Make the function available to the button
+    window.saveInvoice = async function() {
+        const item = document.getElementById('itemName').value;
+        const hsn = document.getElementById('hsnCode').value;
+        const basePrice = parseFloat(document.getElementById('amount').value);
+        const gstRate = parseFloat(document.getElementById('rate').value);
+        const loc = document.getElementById('location').value;
 
-      const tax = (base * rate) / 100;
-      const total = base + tax;
-      const cgst = tax / 2;
-      const sgst = tax / 2;
+        if (!item || !basePrice) {
+            alert("Please enter Item Name and Amount");
+            return;
+        }
 
-      const invoiceData = {
-          customer: gstin,
-          item: itemName,
-          taxableValue: base,
-          cgst: cgst,
-          sgst: sgst,
-          total: total,
-          date: new Date().toISOString(),
-          quarter: "Q1-2026"
-      };
+        // --- GST CALCULATIONS ---
+        const totalTax = (basePrice * gstRate) / 100;
+        const netTotal = basePrice + totalTax;
+        
+        let cgst = 0, sgst = 0, igst = 0;
 
-      try {
-          // Attempt to save to your GlacierPOS Firestore
-          const docRef = await addDoc(collection(db, "invoices"), invoiceData);
-          
-          document.getElementById('displayArea').style.display = 'block';
-          document.getElementById('displayArea').innerHTML = `
-              <b style="color: green;">✔ Saved to GlacierPOS!</b><br>
-              Invoice ID: ${docRef.id}<br>
-              Total Bill: <b>₹${total.toFixed(2)}</b>
-          `;
-          console.log("Document written with ID: ", docRef.id);
-      } catch (e) {
-          console.error("Error adding document: ", e);
-          alert("Error: " + e.message);
-      }
-  }
+        if (loc === "local") {
+            cgst = totalTax / 2;
+            sgst = totalTax / 2;
+        } else {
+            igst = totalTax;
+        }
+
+        const invoiceData = {
+            itemName: item,
+            hsn: hsn,
+            taxableValue: basePrice,
+            cgst: cgst,
+            sgst: sgst,
+            igst: igst,
+            totalBill: netTotal,
+            date: new Date().toISOString(),
+            quarter: "Q1-2026"
+        };
+
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = "block";
+        resultBox.innerHTML = "⏳ Saving to GlacierPOS...";
+
+        try {
+            // Save to Firestore
+            const docRef = await addDoc(collection(db, "invoices"), invoiceData);
+            
+            resultBox.innerHTML = `
+                <span class="success-text">✔ Invoice Saved!</span><br>
+                <small>ID: ${docRef.id}</small><hr>
+                Taxable: ₹${basePrice.toFixed(2)}<br>
+                GST Split: ${loc === 'local' ? `CGST: ${cgst.toFixed(2)}, SGST: ${sgst.toFixed(2)}` : `IGST: ${igst.toFixed(2)}`}<br>
+                <strong>Grand Total: ₹${netTotal.toFixed(2)}</strong>
+            `;
+            
+            // Clear inputs for next bill
+            document.getElementById('itemName').value = "";
+            document.getElementById('amount').value = "";
+
+        } catch (error) {
+            console.error("Error: ", error);
+            resultBox.innerHTML = `<span style="color:red">Error: ${error.message}</span><br>Check if Firestore Rules are set to 'true'.`;
+        }
+    };
 </script>
 
 </body>
