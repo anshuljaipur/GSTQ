@@ -70,9 +70,16 @@
         .totals-row { display: flex; justify-content: space-between; font-size: 18px; margin-bottom: 10px; color: #555; }
         .grand-total { display: flex; justify-content: space-between; font-size: 32px; font-weight: bold; color: var(--green); margin-bottom: 20px; }
         .btn-checkout { background: var(--green); color: white; font-size: 20px; padding: 15px; border-radius: 8px; height: 100%; }
-        
-        /* Due Amount Badge */
         .due-badge { font-size: 13px; font-weight: bold; padding: 2px 8px; border-radius: 12px; display: inline-block; margin-left: 10px; }
+
+        /* ✨ NEW: QUICK ADD MODALS ✨ */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal h3 { margin-top: 0; display: flex; justify-content: space-between; align-items: center; color: var(--nav-bg); border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .close-modal { cursor: pointer; color: var(--red); font-weight: bold; font-size: 20px; border: none; background: none; }
+        .btn-quick-add { width: 40px; padding: 0; font-size: 18px; background: var(--nav-bg); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-quick-add:hover { background: var(--active); }
+        .flex-row { display: flex; gap: 10px; align-items: center; }
     </style>
 </head>
 <body>
@@ -167,8 +174,11 @@
                                         <label style="margin:0;">Select Customer</label>
                                         <span id="posPartyBal" class="due-badge"></span>
                                     </div>
-                                    <!-- Changed to a dropdown for exact ledger matching -->
-                                    <select id="posCustomer" onchange="displayPartyBalance('posCustomer', 'posPartyBal')" style="margin-bottom:10px; height: 40px; font-size: 14px;"></select>
+                                    <!-- ✨ NEW: Added + Button next to POS Customer -->
+                                    <div class="flex-row" style="margin-bottom:10px;">
+                                        <select id="posCustomer" onchange="displayPartyBalance('posCustomer', 'posPartyBal')" style="height: 40px; font-size: 14px; flex:1;"></select>
+                                        <button class="btn-quick-add" onclick="openQuickAdd('party', 'Customer')">+</button>
+                                    </div>
                                     
                                     <label style="margin-bottom:5px;">Payment Mode</label>
                                     <select id="posMode" style="height: 40px;"><option value="Cash">Cash (Galla)</option><option value="Bank">Bank/UPI</option><option value="Credit">Credit (Udhaar)</option></select>
@@ -188,12 +198,23 @@
                     <div class="form-group"><label>Date</label><input type="date" id="invDate"></div>
                     <div class="form-group">
                         <label>Select Party <span id="invPartyBal" class="due-badge" style="float:right;"></span></label>
-                        <select id="invParty" onchange="displayPartyBalance('invParty', 'invPartyBal')"></select>
+                        <!-- ✨ NEW: Added + Button next to Invoice Party -->
+                        <div class="flex-row">
+                            <select id="invParty" onchange="displayPartyBalance('invParty', 'invPartyBal')" style="flex:1;"></select>
+                            <button class="btn-quick-add" onclick="openQuickAdd('party')">+</button>
+                        </div>
                     </div>
                     <div class="form-group"><label>Payment Mode</label><select id="invMode"><option value="Cash">Cash</option><option value="Bank">Bank/UPI</option><option value="Credit">Credit</option></select></div>
                 </div>
                 <div class="grid-4" style="align-items: end;">
-                    <div class="form-group"><label>Item</label><select id="invItem" onchange="autoFillRate()"></select></div>
+                    <div class="form-group">
+                        <label>Item</label>
+                        <!-- ✨ NEW: Added + Button next to Invoice Item -->
+                        <div class="flex-row">
+                            <select id="invItem" onchange="autoFillRate()" style="flex:1;"></select>
+                            <button class="btn-quick-add" onclick="openQuickAdd('item')">+</button>
+                        </div>
+                    </div>
                     <div class="form-group"><label>Qty</label><input type="number" id="invQty" value="1"></div>
                     <div class="form-group"><label>Rate (₹)</label><input type="number" id="invRate"></div>
                     <button class="btn btn-primary" style="margin-bottom: 15px;" onclick="addInvoiceItem()">+ Add Item</button>
@@ -217,7 +238,11 @@
                     <div class="form-group" id="vouchPartyWrap">
                         <label id="vouchPartyLbl" style="display:inline-block;">Select Ledger</label>
                         <span id="vouchPartyBal" class="due-badge" style="float:right;"></span>
-                        <select id="vouchParty" onchange="displayPartyBalance('vouchParty', 'vouchPartyBal')"></select>
+                        <!-- ✨ NEW: Added + Button next to Voucher Ledger -->
+                        <div class="flex-row">
+                            <select id="vouchParty" onchange="displayPartyBalance('vouchParty', 'vouchPartyBal')" style="flex:1;"></select>
+                            <button class="btn-quick-add" onclick="openQuickAdd('party')">+</button>
+                        </div>
                     </div>
                     <div class="form-group" id="vouchModeWrap"><label>Transaction Mode</label><select id="vouchMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select></div>
                     <div class="form-group"><label>Amount (₹)</label><input type="number" id="vouchAmt"></div>
@@ -226,31 +251,24 @@
                 </div>
             </div>
 
-            <!-- REPORTS -->
+            <!-- REPORTS & MASTERS (Unchanged structure) -->
             <div id="view-reports" class="view-section">
                 <h2 class="view-title" id="reportTitle">Report</h2>
                 <div class="report-header" id="reportFilters" style="display: none;">
-                    <div style="width: 300px;"><label>Select Party / Ledger</label><select id="repLedgerSelect" onchange="runReportLogic()"></select></div>
+                    <div style="width: 300px;"><label>Select Ledger</label><select id="repLedgerSelect" onchange="runReportLogic()"></select></div>
                     <button class="btn btn-primary" style="width: auto;" onclick="window.print()">🖨️ Print Report</button>
                 </div>
                 <div id="reportContainer"></div>
             </div>
 
-            <!-- MASTERS -->
             <div id="view-masters" class="view-section">
                 <h2 class="view-title">Setup Masters</h2>
                 <div class="grid-2">
                     <div style="background: var(--bg); padding: 20px; border-radius: 8px;">
                         <h3 style="margin-top:0;">📦 Add New Product</h3>
-                        <div class="grid-2">
-                            <div class="form-group"><label>Barcode</label><input type="text" id="mBarcode"></div>
-                            <div class="form-group"><label>Brand</label><input type="text" id="mBrand"></div>
-                        </div>
+                        <div class="grid-2"><div class="form-group"><label>Barcode</label><input type="text" id="mBarcode"></div><div class="form-group"><label>Brand</label><input type="text" id="mBrand"></div></div>
                         <div class="form-group"><label>Item Name *</label><input type="text" id="mItemName"></div>
-                        <div class="grid-2">
-                            <div class="form-group"><label>Purchase Price</label><input type="number" id="mItemPP" value="0"></div>
-                            <div class="form-group"><label>Selling Price</label><input type="number" id="mItemSP" value="0"></div>
-                        </div>
+                        <div class="grid-2"><div class="form-group"><label>Purchase Price</label><input type="number" id="mItemPP" value="0"></div><div class="form-group"><label>Selling Price</label><input type="number" id="mItemSP" value="0"></div></div>
                         <button class="btn btn-primary" onclick="saveItem()">💾 Save Product</button>
                     </div>
                     <div style="background: var(--bg); padding: 20px; border-radius: 8px; height: fit-content;">
@@ -262,6 +280,36 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ✨ NEW: QUICK ADD MODALS ✨ -->
+    <!-- Modal: Quick Add Party -->
+    <div id="modalParty" class="modal-overlay">
+        <div class="modal">
+            <h3>👥 Quick Add Ledger <button class="close-modal" onclick="closeModal('modalParty')">X</button></h3>
+            <div class="form-group"><label>Account Type</label>
+                <select id="qmPartyType">
+                    <option value="Customer">Customer (Debtor)</option>
+                    <option value="Supplier">Supplier (Creditor)</option>
+                    <option value="Expense">Expense Account</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Party Name</label><input type="text" id="qmPartyName" placeholder="e.g. Rahul Sharma"></div>
+            <button class="btn btn-success" onclick="quickSaveParty()">💾 Save & Continue</button>
+        </div>
+    </div>
+
+    <!-- Modal: Quick Add Item -->
+    <div id="modalItem" class="modal-overlay">
+        <div class="modal">
+            <h3>📦 Quick Add Item <button class="close-modal" onclick="closeModal('modalItem')">X</button></h3>
+            <div class="form-group"><label>Item Name *</label><input type="text" id="qmItemName" placeholder="e.g. Vanilla Scoop"></div>
+            <div class="grid-2">
+                <div class="form-group"><label>Purchase Price ₹</label><input type="number" id="qmItemPP" value="0"></div>
+                <div class="form-group"><label>Selling Price ₹</label><input type="number" id="qmItemSP" value="0"></div>
+            </div>
+            <button class="btn btn-success" onclick="quickSaveItem()">💾 Save & Continue</button>
         </div>
     </div>
 
@@ -300,19 +348,88 @@
 
     window.fetchCoreData = async function() {
         window.masterParties = []; window.masterItems = []; window.allVouchers = [];
-        
-        let snap = await getDocs(collection(db, "masters_party"));
-        snap.forEach(doc => window.masterParties.push({ id: doc.id, ...doc.data() }));
-        
-        snap = await getDocs(collection(db, "masters_item"));
-        snap.forEach(doc => window.masterItems.push({ id: doc.id, ...doc.data() }));
+        let snap = await getDocs(collection(db, "masters_party")); snap.forEach(doc => window.masterParties.push({ id: doc.id, ...doc.data() }));
+        snap = await getDocs(collection(db, "masters_item")); snap.forEach(doc => window.masterItems.push({ id: doc.id, ...doc.data() }));
+        snap = await getDocs(query(collection(db, "vouchers_erp"), orderBy("date", "asc"))); snap.forEach(doc => window.allVouchers.push({ id: doc.id, ...doc.data() }));
+    };
 
-        const iSelect = document.getElementById('invItem');
-        iSelect.innerHTML = '<option value="">-- Choose Item --</option>';
-        window.masterItems.forEach(i => iSelect.innerHTML += `<option value="${i.id}">${i.name}</option>`);
+    // --- ✨ NEW: QUICK ADD MODAL LOGIC ---
+    window.openQuickAdd = function(type, defaultType = "") {
+        if(type === 'party') {
+            document.getElementById('modalParty').style.display = 'flex';
+            if(defaultType) document.getElementById('qmPartyType').value = defaultType;
+            // Infer type from invoice screen if open
+            if(document.getElementById('view-invoice').classList.contains('active')) {
+                const invType = document.getElementById('invType').value;
+                if(invType) document.getElementById('qmPartyType').value = invType.includes('Sale') ? 'Customer' : 'Supplier';
+            }
+        } else {
+            document.getElementById('modalItem').style.display = 'flex';
+        }
+    };
 
-        snap = await getDocs(query(collection(db, "vouchers_erp"), orderBy("date", "asc")));
-        snap.forEach(doc => window.allVouchers.push({ id: doc.id, ...doc.data() }));
+    window.closeModal = function(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    };
+
+    window.refreshActiveDropdowns = function() {
+        // Refresh POS Party
+        const posSel = document.getElementById('posCustomer'); const posVal = posSel.value;
+        posSel.innerHTML = '<option value="Walk_In">Walk-in / Cash Customer</option>';
+        window.masterParties.filter(p => p.type === 'Customer').forEach(p => posSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+        if(window.masterParties.find(p => p.name === posVal)) posSel.value = posVal;
+
+        // Refresh Invoice Party
+        const invType = document.getElementById('invType').value;
+        if(invType) {
+            const invSel = document.getElementById('invParty'); const invVal = invSel.value;
+            invSel.innerHTML = '<option value="">-- Select Party --</option>';
+            window.masterParties.filter(p => p.type === (invType.includes('Sale')?'Customer':'Supplier')).forEach(p => invSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+            if(window.masterParties.find(p => p.name === invVal)) invSel.value = invVal;
+        }
+
+        // Refresh Voucher Party
+        const vSel = document.getElementById('vouchParty'); const vVal = vSel.value;
+        vSel.innerHTML = '<option value="">-- Select Ledger --</option>';
+        window.masterParties.forEach(p => vSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+        if(window.masterParties.find(p => p.name === vVal)) vSel.value = vVal;
+
+        // Refresh Items Dropdown & POS Grid
+        const iSel = document.getElementById('invItem'); const iVal = iSel.value;
+        iSel.innerHTML = '<option value="">-- Choose Item --</option>';
+        window.masterItems.forEach(i => iSel.innerHTML += `<option value="${i.id}">${i.name}</option>`);
+        if(window.masterItems.find(i => i.id === iVal)) iSel.value = iVal;
+        renderItemGrid(document.getElementById('posSearch').value.toLowerCase());
+    };
+
+    window.quickSaveParty = async function() {
+        const type = document.getElementById('qmPartyType').value;
+        const name = document.getElementById('qmPartyName').value;
+        if(!name) return alert("Please enter Party Name");
+        
+        await addDoc(collection(db, "masters_party"), { type, name });
+        document.getElementById('qmPartyName').value = "";
+        closeModal('modalParty');
+        
+        await fetchCoreData();
+        refreshActiveDropdowns(); // Seamlessly update UI
+        alert(`✔ ${name} added to Ledgers!`);
+    };
+
+    window.quickSaveItem = async function() {
+        const name = document.getElementById('qmItemName').value;
+        if(!name) return alert("Please enter Item Name");
+        
+        await addDoc(collection(db, "masters_item"), {
+            name: name, pp: parseFloat(document.getElementById('qmItemPP').value)||0, sp: parseFloat(document.getElementById('qmItemSP').value)||0
+        });
+        
+        document.getElementById('qmItemName').value = ""; document.getElementById('qmItemPP').value = "0"; document.getElementById('qmItemSP').value = "0";
+        closeModal('modalItem');
+        
+        await fetchCoreData();
+        refreshActiveDropdowns();
+        alert(`✔ ${name} added to Inventory!`);
     };
 
     // --- LIVE BALANCE CALCULATION ENGINE ---
@@ -326,7 +443,6 @@
             if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && partyName === 'Cash')) cr = amt;
             bal += (dr - cr);
         });
-        
         if(bal === 0) return "Settled (₹0.00)";
         return `₹${Math.abs(bal).toFixed(2)} ${bal > 0 ? '(Dr) Due to Receive' : '(Cr) Due to Pay'}`;
     };
@@ -335,51 +451,21 @@
         const party = document.getElementById(selectId).value;
         const display = document.getElementById(displayId);
         if(!display) return;
-        
-        if(!party || party === 'Cash_Counter' || party === 'Walk_In') {
-            display.innerText = '';
-            display.style.background = 'transparent';
-            return;
-        }
-        
+        if(!party || party === 'Cash_Counter' || party === 'Walk_In') { display.innerText = ''; display.style.background = 'transparent'; return; }
         const balText = calculatePartyBalance(party);
         display.innerText = balText;
-        
-        // Color coding the Due Badge
         if(balText.includes('Settled')) { display.style.background = '#ecf0f1'; display.style.color = '#7f8c8d'; }
         else if(balText.includes('(Dr)')) { display.style.background = '#fdebd0'; display.style.color = 'var(--orange)'; }
         else if(balText.includes('(Cr)')) { display.style.background = '#fadbd8'; display.style.color = 'var(--red)'; }
     };
 
     // --- MASTERS ---
-    window.saveParty = async function() {
-        await addDoc(collection(db, "masters_party"), { type: document.getElementById('mPartyType').value, name: document.getElementById('mPartyName').value });
-        alert("Ledger Saved!"); await fetchCoreData(); document.getElementById('mPartyName').value = "";
-    };
-    
-    window.saveItem = async function() {
-        const payload = {
-            barcode: document.getElementById('mBarcode').value, brand: document.getElementById('mBrand').value,
-            name: document.getElementById('mItemName').value,
-            pp: parseFloat(document.getElementById('mItemPP').value)||0, sp: parseFloat(document.getElementById('mItemSP').value)||0
-        };
-        if(!payload.name) return alert("Item Name is required");
-        await addDoc(collection(db, "masters_item"), payload);
-        alert("Product Saved!"); await fetchCoreData();
-        document.querySelectorAll('#view-masters input').forEach(i => i.value = '');
-    };
+    window.saveParty = async function() { await addDoc(collection(db, "masters_party"), { type: document.getElementById('mPartyType').value, name: document.getElementById('mPartyName').value }); alert("Ledger Saved!"); await fetchCoreData(); document.getElementById('mPartyName').value = ""; refreshActiveDropdowns(); };
+    window.saveItem = async function() { await addDoc(collection(db, "masters_item"), { barcode: document.getElementById('mBarcode').value, brand: document.getElementById('mBrand').value, name: document.getElementById('mItemName').value, pp: parseFloat(document.getElementById('mItemPP').value)||0, sp: parseFloat(document.getElementById('mItemSP').value)||0 }); alert("Product Saved!"); await fetchCoreData(); document.querySelectorAll('#view-masters input').forEach(i => i.value = ''); refreshActiveDropdowns(); };
 
     // --- POS ENGINE ---
     window.openPOS = function() {
-        openView('pos');
-        
-        // Populate POS Customer Dropdown
-        const cSel = document.getElementById('posCustomer');
-        cSel.innerHTML = '<option value="Walk_In">Walk-in / Cash Customer</option>';
-        window.masterParties.filter(p => p.type === 'Customer').forEach(p => cSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
-        displayPartyBalance('posCustomer', 'posPartyBal'); // clear badge
-        
-        renderItemGrid("");
+        openView('pos'); refreshActiveDropdowns(); displayPartyBalance('posCustomer', 'posPartyBal');
         document.getElementById('posSearch').focus();
     };
 
@@ -414,12 +500,7 @@
     window.updateCart = function(i, f, v) { window.cart[i][f] = v; renderCart(); };
     window.toggleDiscType = function(i) { window.cart[i].discType = window.cart[i].discType === '₹' ? '%' : '₹'; window.cart[i].discValue = 0; renderCart(); };
     window.removeFromCart = function(i) { window.cart.splice(i, 1); renderCart(); };
-    window.clearCart = function() { 
-        window.cart = []; 
-        document.getElementById('posCustomer').value = 'Walk_In'; 
-        displayPartyBalance('posCustomer', 'posPartyBal');
-        renderCart(); 
-    };
+    window.clearCart = function() { window.cart = []; document.getElementById('posCustomer').value = 'Walk_In'; displayPartyBalance('posCustomer', 'posPartyBal'); renderCart(); };
 
     window.renderCart = function() {
         const tbody = document.getElementById('cartBody'); tbody.innerHTML = '';
@@ -447,25 +528,18 @@
         if(window.cart.length === 0) return alert("Cart empty");
         const payload = {
             date: new Date().toISOString(), module: 'Invoice', type: 'Sale',
-            party: document.getElementById('posCustomer').value || "Walk_In",
-            mode: document.getElementById('posMode').value,
+            party: document.getElementById('posCustomer').value || "Walk_In", mode: document.getElementById('posMode').value,
             items: window.cart, amount: parseFloat(document.getElementById('posGrandTotal').innerText.replace('₹',''))
         };
         await addDoc(collection(db, "vouchers_erp"), payload);
-        alert("Sale Complete!"); clearCart(); await fetchCoreData();
-        displayPartyBalance('posCustomer', 'posPartyBal'); // Refresh balance immediately
+        alert("Sale Complete!"); clearCart(); await fetchCoreData(); displayPartyBalance('posCustomer', 'posPartyBal');
     };
 
     // --- PURCHASE / RETURN ENGINE ---
     window.openInvoice = function(type, title) {
-        openView('invoice');
-        document.getElementById('invTitle').innerText = title; document.getElementById('invType').value = type;
+        openView('invoice'); document.getElementById('invTitle').innerText = title; document.getElementById('invType').value = type;
         window.currentInvoiceItems = []; window.renderInvoiceTable();
-        
-        const pSelect = document.getElementById('invParty'); 
-        pSelect.innerHTML = '<option value="">-- Select Party --</option>';
-        window.masterParties.filter(p => p.type === (type.includes('Sale')?'Customer':'Supplier')).forEach(p => pSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`);
-        displayPartyBalance('invParty', 'invPartyBal'); // clear badge
+        refreshActiveDropdowns(); displayPartyBalance('invParty', 'invPartyBal');
     };
 
     window.autoFillRate = function() {
@@ -474,18 +548,15 @@
     };
 
     window.addInvoiceItem = function() {
-        const sel = document.getElementById('invItem');
-        const name = sel.options[sel.selectedIndex].text;
-        const qty = parseFloat(document.getElementById('invQty').value);
-        const rate = parseFloat(document.getElementById('invRate').value);
+        const sel = document.getElementById('invItem'); const name = sel.options[sel.selectedIndex].text;
+        const qty = parseFloat(document.getElementById('invQty').value); const rate = parseFloat(document.getElementById('invRate').value);
         if(name && qty && rate) { window.currentInvoiceItems.push({ name, qty, rate, total: qty * rate }); window.renderInvoiceTable(); }
     };
 
     window.renderInvoiceTable = function() {
         const tbody = document.getElementById('invBody'); tbody.innerHTML = ""; let gt = 0;
         window.currentInvoiceItems.forEach((i, idx) => {
-            gt += i.total;
-            tbody.innerHTML += `<tr><td>${i.name}</td><td>${i.qty}</td><td>₹${i.rate}</td><td>₹${i.total}</td><td><button onclick="window.currentInvoiceItems.splice(${idx},1); window.renderInvoiceTable()">X</button></td></tr>`;
+            gt += i.total; tbody.innerHTML += `<tr><td>${i.name}</td><td>${i.qty}</td><td>₹${i.rate}</td><td>₹${i.total}</td><td><button onclick="window.currentInvoiceItems.splice(${idx},1); window.renderInvoiceTable()">X</button></td></tr>`;
         });
         document.getElementById('invGrandTotal').innerText = gt.toFixed(2);
     };
@@ -503,13 +574,10 @@
     // --- VOUCHERS ---
     window.openVoucher = function(type, title) {
         openView('voucher'); document.getElementById('vouchTitle').innerText = title; document.getElementById('vouchType').value = type;
-        const pSel = document.getElementById('vouchParty'); pSel.innerHTML = '<option value="">-- Select Ledger --</option>';
         document.getElementById('vouchPartyWrap').style.display = type === 'Contra' ? 'none' : 'block';
-        
         if(type === 'Contra') document.getElementById('vouchModeWrap').innerHTML = `<label>Action</label><select id="vouchMode"><option value="CashToBank">Deposit Cash to Bank</option><option value="BankToCash">Withdraw from Bank</option></select>`;
-        else window.masterParties.forEach(p => pSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
-        
-        displayPartyBalance('vouchParty', 'vouchPartyBal'); // clear badge
+        else document.getElementById('vouchModeWrap').innerHTML = `<label>Transaction Mode</label><select id="vouchMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select>`;
+        refreshActiveDropdowns(); displayPartyBalance('vouchParty', 'vouchPartyBal');
     };
 
     window.saveVoucher = async function() {
