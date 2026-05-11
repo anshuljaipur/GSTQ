@@ -8,7 +8,6 @@
         :root { --nav-bg: #2c3e50; --active: #3498db; --bg: #ecf0f1; --card: #ffffff; --text: #333; --border: #bdc3c7; --green: #27ae60; --red: #c0392b; --orange: #e67e22; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* TOP NAVIGATION BAR */
         .navbar { background: var(--nav-bg); color: white; display: flex; align-items: center; padding: 0 20px; height: 60px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; }
         .brand { font-size: 20px; font-weight: bold; margin-right: 30px; letter-spacing: 1px; color: #f1c40f; }
         .nav-menu { display: flex; height: 100%; }
@@ -20,7 +19,6 @@
         .dropdown-content a:hover { background-color: #f8f9fa; color: var(--active); font-weight: 600; padding-left: 20px; transition: 0.2s; }
         .dropdown:hover .dropdown-content { display: block; }
 
-        /* Main Content Area */
         .main-content { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 20px; }
         .content-wrapper { width: 100%; max-width: 1400px; }
         .view-section { display: none; background: var(--card); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -28,13 +26,12 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         h2.view-title { margin-top: 0; color: var(--nav-bg); border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 20px; }
 
-        /* Generic Forms */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #555; }
-        input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; font-size: 14px; font-family: inherit; }
         .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; width: 100%; font-size: 14px;}
         .btn-primary { background: var(--active); color: white; }
         .btn-success { background: var(--green); color: white; }
@@ -45,13 +42,11 @@
         th { background: #f8f9fa; color: var(--nav-bg); font-weight: bold; }
         tr:nth-child(even) { background-color: #f9f9f9; }
 
-        /* Dashboard & Reports */
         .dash-card { padding: 20px; border-radius: 8px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .dash-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; opacity: 0.9; }
         .dash-card .amt { font-size: 28px; font-weight: bold; }
         .report-header { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #ddd;}
 
-        /* POS Specific */
         .pos-layout { display: grid; grid-template-columns: 45% 55%; gap: 20px; height: calc(100vh - 150px); }
         .pos-inventory { background: #f8f9fa; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; border: 1px solid var(--border); }
         .omni-search { padding: 15px; font-size: 18px; border: 2px solid var(--active); border-radius: 8px; margin-bottom: 15px; width: 100%; box-sizing: border-box; background: white; }
@@ -72,14 +67,19 @@
         .btn-checkout { background: var(--green); color: white; font-size: 20px; padding: 15px; border-radius: 8px; height: 100%; }
         .due-badge { font-size: 13px; font-weight: bold; padding: 2px 8px; border-radius: 12px; display: inline-block; margin-left: 10px; }
 
-        /* ✨ NEW: QUICK ADD MODALS ✨ */
+        /* MODALS */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-        .modal { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .modal h3 { margin-top: 0; display: flex; justify-content: space-between; align-items: center; color: var(--nav-bg); border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .close-modal { cursor: pointer; color: var(--red); font-weight: bold; font-size: 20px; border: none; background: none; }
         .btn-quick-add { width: 40px; padding: 0; font-size: 18px; background: var(--nav-bg); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-quick-add:hover { background: var(--active); }
         .flex-row { display: flex; gap: 10px; align-items: center; }
+
+        /* Accounting Reports */
+        .acct-group { background: #f8f9fa; font-weight: bold; color: var(--nav-bg); }
+        .acct-sub { padding-left: 30px !important; color: #555; }
+        .acct-total { font-weight: bold; border-top: 2px solid #ccc; }
     </style>
 </head>
 <body>
@@ -113,6 +113,8 @@
                 <button class="dropbtn">Reports ▾</button>
                 <div class="dropdown-content">
                     <a onclick="openReport('PNL', 'Profit & Loss Statement')">📈 Profit & Loss A/c</a>
+                    <a onclick="openReport('BS', 'Balance Sheet')">⚖️ Balance Sheet</a>
+                    <a onclick="openReport('TB', 'Trial Balance')">📊 Trial Balance</a>
                     <a onclick="openReport('CashFlow', 'Cash & Bank Flow')">💸 Cash/Bank Book</a>
                     <a onclick="openReport('ItemsFlow', 'Items Flow (Stock)')">📦 Inventory Flow</a>
                     <a onclick="openReport('LedgerStatement', 'Party Ledger Statement')">📜 Ledger Statement</a>
@@ -122,7 +124,8 @@
             <div class="dropdown">
                 <button class="dropbtn">Administration ▾</button>
                 <div class="dropdown-content">
-                    <a onclick="openView('masters')">⚙️ Setup Masters (Items/Ledgers)</a>
+                    <a onclick="openQuickAdd('party')">👥 Add Ledger Account</a>
+                    <a onclick="openQuickAdd('item')">📦 Add Inventory Item</a>
                 </div>
             </div>
         </div>
@@ -174,12 +177,10 @@
                                         <label style="margin:0;">Select Customer</label>
                                         <span id="posPartyBal" class="due-badge"></span>
                                     </div>
-                                    <!-- ✨ NEW: Added + Button next to POS Customer -->
                                     <div class="flex-row" style="margin-bottom:10px;">
                                         <select id="posCustomer" onchange="displayPartyBalance('posCustomer', 'posPartyBal')" style="height: 40px; font-size: 14px; flex:1;"></select>
-                                        <button class="btn-quick-add" onclick="openQuickAdd('party', 'Customer')">+</button>
+                                        <button class="btn-quick-add" onclick="openQuickAdd('party', 'Sundry Debtors')">+</button>
                                     </div>
-                                    
                                     <label style="margin-bottom:5px;">Payment Mode</label>
                                     <select id="posMode" style="height: 40px;"><option value="Cash">Cash (Galla)</option><option value="Bank">Bank/UPI</option><option value="Credit">Credit (Udhaar)</option></select>
                                 </div>
@@ -190,7 +191,7 @@
                 </div>
             </div>
 
-            <!-- INVOICE ENGINE (Purchases/Returns) -->
+            <!-- INVOICE ENGINE -->
             <div id="view-invoice" class="view-section">
                 <h2 class="view-title" id="invTitle">Invoice</h2>
                 <input type="hidden" id="invType">
@@ -198,7 +199,6 @@
                     <div class="form-group"><label>Date</label><input type="date" id="invDate"></div>
                     <div class="form-group">
                         <label>Select Party <span id="invPartyBal" class="due-badge" style="float:right;"></span></label>
-                        <!-- ✨ NEW: Added + Button next to Invoice Party -->
                         <div class="flex-row">
                             <select id="invParty" onchange="displayPartyBalance('invParty', 'invPartyBal')" style="flex:1;"></select>
                             <button class="btn-quick-add" onclick="openQuickAdd('party')">+</button>
@@ -209,7 +209,6 @@
                 <div class="grid-4" style="align-items: end;">
                     <div class="form-group">
                         <label>Item</label>
-                        <!-- ✨ NEW: Added + Button next to Invoice Item -->
                         <div class="flex-row">
                             <select id="invItem" onchange="autoFillRate()" style="flex:1;"></select>
                             <button class="btn-quick-add" onclick="openQuickAdd('item')">+</button>
@@ -238,7 +237,6 @@
                     <div class="form-group" id="vouchPartyWrap">
                         <label id="vouchPartyLbl" style="display:inline-block;">Select Ledger</label>
                         <span id="vouchPartyBal" class="due-badge" style="float:right;"></span>
-                        <!-- ✨ NEW: Added + Button next to Voucher Ledger -->
                         <div class="flex-row">
                             <select id="vouchParty" onchange="displayPartyBalance('vouchParty', 'vouchPartyBal')" style="flex:1;"></select>
                             <button class="btn-quick-add" onclick="openQuickAdd('party')">+</button>
@@ -251,7 +249,7 @@
                 </div>
             </div>
 
-            <!-- REPORTS & MASTERS (Unchanged structure) -->
+            <!-- REPORTS -->
             <div id="view-reports" class="view-section">
                 <h2 class="view-title" id="reportTitle">Report</h2>
                 <div class="report-header" id="reportFilters" style="display: none;">
@@ -261,42 +259,53 @@
                 <div id="reportContainer"></div>
             </div>
 
-            <div id="view-masters" class="view-section">
-                <h2 class="view-title">Setup Masters</h2>
-                <div class="grid-2">
-                    <div style="background: var(--bg); padding: 20px; border-radius: 8px;">
-                        <h3 style="margin-top:0;">📦 Add New Product</h3>
-                        <div class="grid-2"><div class="form-group"><label>Barcode</label><input type="text" id="mBarcode"></div><div class="form-group"><label>Brand</label><input type="text" id="mBrand"></div></div>
-                        <div class="form-group"><label>Item Name *</label><input type="text" id="mItemName"></div>
-                        <div class="grid-2"><div class="form-group"><label>Purchase Price</label><input type="number" id="mItemPP" value="0"></div><div class="form-group"><label>Selling Price</label><input type="number" id="mItemSP" value="0"></div></div>
-                        <button class="btn btn-primary" onclick="saveItem()">💾 Save Product</button>
-                    </div>
-                    <div style="background: var(--bg); padding: 20px; border-radius: 8px; height: fit-content;">
-                        <h3 style="margin-top:0;">👥 Add Party Ledger</h3>
-                        <div class="form-group"><label>Type</label><select id="mPartyType"><option value="Customer">Customer</option><option value="Supplier">Supplier</option><option value="Expense">Expense Account</option></select></div>
-                        <div class="form-group"><label>Name</label><input type="text" id="mPartyName"></div>
-                        <button class="btn btn-primary" onclick="saveParty()">💾 Save Ledger</button>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <!-- ✨ NEW: QUICK ADD MODALS ✨ -->
-    <!-- Modal: Quick Add Party -->
+    <!-- ✨ FULL ACCOUNTING QUICK ADD MODALS ✨ -->
+    <!-- Modal: Quick Add Ledger -->
     <div id="modalParty" class="modal-overlay">
         <div class="modal">
-            <h3>👥 Quick Add Ledger <button class="close-modal" onclick="closeModal('modalParty')">X</button></h3>
-            <div class="form-group"><label>Account Type</label>
-                <select id="qmPartyType">
-                    <option value="Customer">Customer (Debtor)</option>
-                    <option value="Supplier">Supplier (Creditor)</option>
-                    <option value="Expense">Expense Account</option>
-                </select>
+            <h3>👥 Create Ledger Account <button class="close-modal" onclick="closeModal('modalParty')">X</button></h3>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Under Group (Account Type) *</label>
+                    <select id="qmPartyType" style="font-weight: bold; background: #fdfdfd;">
+                        <optgroup label="Assets">
+                            <option value="Sundry Debtors">Sundry Debtors (Customers)</option>
+                            <option value="Bank Accounts">Bank Accounts</option>
+                            <option value="Cash-in-hand">Cash-in-hand</option>
+                            <option value="Fixed Assets">Fixed Assets (Computers, Shop)</option>
+                        </optgroup>
+                        <optgroup label="Liabilities">
+                            <option value="Sundry Creditors">Sundry Creditors (Suppliers)</option>
+                            <option value="Capital Account">Capital Account (Owner)</option>
+                            <option value="Loans (Liability)">Loans (Liability)</option>
+                            <option value="Duties & Taxes">Duties & Taxes</option>
+                        </optgroup>
+                        <optgroup label="Income & Expenses">
+                            <option value="Direct Incomes">Direct Incomes</option>
+                            <option value="Indirect Incomes">Indirect Incomes</option>
+                            <option value="Direct Expenses">Direct Expenses (Purchases)</option>
+                            <option value="Indirect Expenses">Indirect Expenses (Rent, Salary)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group"><label>Ledger Name *</label><input type="text" id="qmPartyName" placeholder="e.g. Rahul Sharma"></div>
             </div>
-            <div class="form-group"><label>Party Name</label><input type="text" id="qmPartyName" placeholder="e.g. Rahul Sharma"></div>
-            <button class="btn btn-success" onclick="quickSaveParty()">💾 Save & Continue</button>
+            
+            <div class="grid-2" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <div class="form-group"><label>Opening Balance (₹)</label><input type="number" id="qmOpBal" value="0"></div>
+                <div class="form-group"><label>Dr / Cr</label><select id="qmBalType"><option value="Dr">Debit (Dr) - You receive</option><option value="Cr">Credit (Cr) - You pay</option></select></div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group"><label>Phone Number</label><input type="text" id="qmPhone" placeholder="Optional"></div>
+                <div class="form-group"><label>GSTIN / Tax ID</label><input type="text" id="qmGst" placeholder="Optional"></div>
+            </div>
+            <div class="form-group"><label>Address / Notes</label><textarea id="qmAddress" rows="2" placeholder="Optional"></textarea></div>
+            
+            <button class="btn btn-success" onclick="quickSaveParty()">💾 Save Ledger Master</button>
         </div>
     </div>
 
@@ -304,12 +313,13 @@
     <div id="modalItem" class="modal-overlay">
         <div class="modal">
             <h3>📦 Quick Add Item <button class="close-modal" onclick="closeModal('modalItem')">X</button></h3>
+            <div class="grid-2"><div class="form-group"><label>Barcode</label><input type="text" id="qmBarcode"></div><div class="form-group"><label>Brand</label><input type="text" id="qmBrand"></div></div>
             <div class="form-group"><label>Item Name *</label><input type="text" id="qmItemName" placeholder="e.g. Vanilla Scoop"></div>
             <div class="grid-2">
                 <div class="form-group"><label>Purchase Price ₹</label><input type="number" id="qmItemPP" value="0"></div>
                 <div class="form-group"><label>Selling Price ₹</label><input type="number" id="qmItemSP" value="0"></div>
             </div>
-            <button class="btn btn-success" onclick="quickSaveItem()">💾 Save & Continue</button>
+            <button class="btn btn-success" onclick="quickSaveItem()">💾 Save Item</button>
         </div>
     </div>
 
@@ -339,7 +349,6 @@
     document.getElementById('invDate').valueAsDate = new Date();
     document.getElementById('vouchDate').valueAsDate = new Date();
 
-    // --- NAVIGATION & INIT ---
     window.openView = function(viewId) {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         document.getElementById(`view-${viewId}`).classList.add('active');
@@ -353,48 +362,44 @@
         snap = await getDocs(query(collection(db, "vouchers_erp"), orderBy("date", "asc"))); snap.forEach(doc => window.allVouchers.push({ id: doc.id, ...doc.data() }));
     };
 
-    // --- ✨ NEW: QUICK ADD MODAL LOGIC ---
     window.openQuickAdd = function(type, defaultType = "") {
         if(type === 'party') {
             document.getElementById('modalParty').style.display = 'flex';
             if(defaultType) document.getElementById('qmPartyType').value = defaultType;
-            // Infer type from invoice screen if open
             if(document.getElementById('view-invoice').classList.contains('active')) {
                 const invType = document.getElementById('invType').value;
-                if(invType) document.getElementById('qmPartyType').value = invType.includes('Sale') ? 'Customer' : 'Supplier';
+                if(invType) document.getElementById('qmPartyType').value = invType.includes('Sale') ? 'Sundry Debtors' : 'Sundry Creditors';
             }
         } else {
             document.getElementById('modalItem').style.display = 'flex';
         }
     };
-
-    window.closeModal = function(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    };
+    window.closeModal = function(modalId) { document.getElementById(modalId).style.display = 'none'; };
 
     window.refreshActiveDropdowns = function() {
-        // Refresh POS Party
+        // POS
         const posSel = document.getElementById('posCustomer'); const posVal = posSel.value;
         posSel.innerHTML = '<option value="Walk_In">Walk-in / Cash Customer</option>';
-        window.masterParties.filter(p => p.type === 'Customer').forEach(p => posSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+        window.masterParties.filter(p => p.type === 'Sundry Debtors').forEach(p => posSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
         if(window.masterParties.find(p => p.name === posVal)) posSel.value = posVal;
 
-        // Refresh Invoice Party
+        // Invoice
         const invType = document.getElementById('invType').value;
         if(invType) {
             const invSel = document.getElementById('invParty'); const invVal = invSel.value;
             invSel.innerHTML = '<option value="">-- Select Party --</option>';
-            window.masterParties.filter(p => p.type === (invType.includes('Sale')?'Customer':'Supplier')).forEach(p => invSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+            const targetGroup = invType.includes('Sale') ? 'Sundry Debtors' : 'Sundry Creditors';
+            window.masterParties.filter(p => p.type === targetGroup).forEach(p => invSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
             if(window.masterParties.find(p => p.name === invVal)) invSel.value = invVal;
         }
 
-        // Refresh Voucher Party
+        // Voucher
         const vSel = document.getElementById('vouchParty'); const vVal = vSel.value;
         vSel.innerHTML = '<option value="">-- Select Ledger --</option>';
-        window.masterParties.forEach(p => vSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+        window.masterParties.forEach(p => vSel.innerHTML += `<option value="${p.name}">${p.name} (${p.type})</option>`);
         if(window.masterParties.find(p => p.name === vVal)) vSel.value = vVal;
 
-        // Refresh Items Dropdown & POS Grid
+        // Items
         const iSel = document.getElementById('invItem'); const iVal = iSel.value;
         iSel.innerHTML = '<option value="">-- Choose Item --</option>';
         window.masterItems.forEach(i => iSel.innerHTML += `<option value="${i.id}">${i.name}</option>`);
@@ -403,220 +408,163 @@
     };
 
     window.quickSaveParty = async function() {
-        const type = document.getElementById('qmPartyType').value;
-        const name = document.getElementById('qmPartyName').value;
-        if(!name) return alert("Please enter Party Name");
+        const payload = {
+            type: document.getElementById('qmPartyType').value,
+            name: document.getElementById('qmPartyName').value,
+            opBal: parseFloat(document.getElementById('qmOpBal').value) || 0,
+            balType: document.getElementById('qmBalType').value,
+            phone: document.getElementById('qmPhone').value,
+            gst: document.getElementById('qmGst').value,
+            address: document.getElementById('qmAddress').value
+        };
+        if(!payload.name) return alert("Please enter Ledger Name");
         
-        await addDoc(collection(db, "masters_party"), { type, name });
-        document.getElementById('qmPartyName').value = "";
+        await addDoc(collection(db, "masters_party"), payload);
+        document.querySelectorAll('#modalParty input, #modalParty textarea').forEach(el => el.value = '');
+        document.getElementById('qmOpBal').value = '0';
         closeModal('modalParty');
         
-        await fetchCoreData();
-        refreshActiveDropdowns(); // Seamlessly update UI
-        alert(`✔ ${name} added to Ledgers!`);
+        await fetchCoreData(); refreshActiveDropdowns();
+        alert(`✔ ${payload.name} added to Chart of Accounts!`);
     };
 
     window.quickSaveItem = async function() {
         const name = document.getElementById('qmItemName').value;
         if(!name) return alert("Please enter Item Name");
-        
-        await addDoc(collection(db, "masters_item"), {
-            name: name, pp: parseFloat(document.getElementById('qmItemPP').value)||0, sp: parseFloat(document.getElementById('qmItemSP').value)||0
-        });
-        
-        document.getElementById('qmItemName').value = ""; document.getElementById('qmItemPP').value = "0"; document.getElementById('qmItemSP').value = "0";
-        closeModal('modalItem');
-        
-        await fetchCoreData();
-        refreshActiveDropdowns();
+        await addDoc(collection(db, "masters_item"), { barcode: document.getElementById('qmBarcode').value, brand: document.getElementById('qmBrand').value, name: name, pp: parseFloat(document.getElementById('qmItemPP').value)||0, sp: parseFloat(document.getElementById('qmItemSP').value)||0 });
+        document.querySelectorAll('#modalItem input').forEach(el => el.value = '');
+        document.getElementById('qmItemPP').value = '0'; document.getElementById('qmItemSP').value = '0';
+        closeModal('modalItem'); await fetchCoreData(); refreshActiveDropdowns();
         alert(`✔ ${name} added to Inventory!`);
     };
 
-    // --- LIVE BALANCE CALCULATION ENGINE ---
-    window.calculatePartyBalance = function(partyName) {
-        if(!partyName || partyName === 'Cash_Counter' || partyName === 'Walk_In') return "";
-        let bal = 0;
-        window.allVouchers.filter(v => v.party === partyName || v.mode === partyName || (v.type==='Contra' && v.mode.includes(partyName))).forEach(v => {
+    // --- FULL ACCOUNTING CALCULATION ENGINE ---
+    window.getLedgerBalance = function(partyName) {
+        if(!partyName || partyName === 'Cash_Counter' || partyName === 'Walk_In') return { bal: 0, type: '' };
+        
+        let netDr = 0, netCr = 0;
+        
+        // Add Opening Balance
+        const ledger = window.masterParties.find(p => p.name === partyName);
+        if(ledger && ledger.opBal > 0) {
+            if(ledger.balType === 'Dr') netDr += ledger.opBal;
+            else netCr += ledger.opBal;
+        }
+
+        // Add Transactions
+        window.allVouchers.forEach(v => {
             const amt = parseFloat(v.amount || v.totalAmount || 0);
-            let dr = 0, cr = 0;
-            if(v.type === 'Sale' || v.type === 'Payment' || (v.mode === 'CashToBank' && partyName === 'Bank')) dr = amt;
-            if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && partyName === 'Cash')) cr = amt;
-            bal += (dr - cr);
+            if(v.party === partyName || v.mode === partyName || (v.type==='Contra' && v.mode.includes(partyName))) {
+                if(v.type === 'Sale' || v.type === 'Payment' || (v.mode === 'CashToBank' && partyName === 'Bank')) netDr += amt;
+                if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && partyName === 'Cash')) netCr += amt;
+            }
         });
-        if(bal === 0) return "Settled (₹0.00)";
-        return `₹${Math.abs(bal).toFixed(2)} ${bal > 0 ? '(Dr) Due to Receive' : '(Cr) Due to Pay'}`;
+
+        let finalBal = netDr - netCr;
+        return { bal: Math.abs(finalBal), type: finalBal >= 0 ? 'Dr' : 'Cr', raw: finalBal };
     };
 
     window.displayPartyBalance = function(selectId, displayId) {
-        const party = document.getElementById(selectId).value;
-        const display = document.getElementById(displayId);
+        const party = document.getElementById(selectId).value; const display = document.getElementById(displayId);
         if(!display) return;
         if(!party || party === 'Cash_Counter' || party === 'Walk_In') { display.innerText = ''; display.style.background = 'transparent'; return; }
-        const balText = calculatePartyBalance(party);
-        display.innerText = balText;
-        if(balText.includes('Settled')) { display.style.background = '#ecf0f1'; display.style.color = '#7f8c8d'; }
-        else if(balText.includes('(Dr)')) { display.style.background = '#fdebd0'; display.style.color = 'var(--orange)'; }
-        else if(balText.includes('(Cr)')) { display.style.background = '#fadbd8'; display.style.color = 'var(--red)'; }
+        
+        const b = getLedgerBalance(party);
+        if(b.bal === 0) { display.innerText = "Settled (₹0.00)"; display.style.background = '#ecf0f1'; display.style.color = '#7f8c8d'; }
+        else {
+            display.innerText = `₹${b.bal.toFixed(2)} (${b.type})`;
+            if(b.type === 'Dr') { display.style.background = '#fdebd0'; display.style.color = 'var(--orange)'; }
+            else { display.style.background = '#fadbd8'; display.style.color = 'var(--red)'; }
+        }
     };
-
-    // --- MASTERS ---
-    window.saveParty = async function() { await addDoc(collection(db, "masters_party"), { type: document.getElementById('mPartyType').value, name: document.getElementById('mPartyName').value }); alert("Ledger Saved!"); await fetchCoreData(); document.getElementById('mPartyName').value = ""; refreshActiveDropdowns(); };
-    window.saveItem = async function() { await addDoc(collection(db, "masters_item"), { barcode: document.getElementById('mBarcode').value, brand: document.getElementById('mBrand').value, name: document.getElementById('mItemName').value, pp: parseFloat(document.getElementById('mItemPP').value)||0, sp: parseFloat(document.getElementById('mItemSP').value)||0 }); alert("Product Saved!"); await fetchCoreData(); document.querySelectorAll('#view-masters input').forEach(i => i.value = ''); refreshActiveDropdowns(); };
 
     // --- POS ENGINE ---
-    window.openPOS = function() {
-        openView('pos'); refreshActiveDropdowns(); displayPartyBalance('posCustomer', 'posPartyBal');
-        document.getElementById('posSearch').focus();
-    };
-
+    window.openPOS = function() { openView('pos'); refreshActiveDropdowns(); displayPartyBalance('posCustomer', 'posPartyBal'); document.getElementById('posSearch').focus(); };
     document.getElementById('posSearch').addEventListener('input', e => renderItemGrid(e.target.value.toLowerCase()));
-    document.getElementById('posSearch').addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-            const exactMatch = window.masterItems.find(i => i.barcode && i.barcode.toLowerCase() === e.target.value.trim().toLowerCase());
-            if (exactMatch) { addToCart(exactMatch.id); e.target.value = ''; renderItemGrid(""); }
-        }
-    });
+    document.getElementById('posSearch').addEventListener('keypress', e => { if (e.key === 'Enter') { const ex = window.masterItems.find(i => i.barcode && i.barcode.toLowerCase() === e.target.value.trim().toLowerCase()); if (ex) { addToCart(ex.id); e.target.value = ''; renderItemGrid(""); } }});
+    window.renderItemGrid = function(sq) { const grid = document.getElementById('posItemGrid'); grid.innerHTML = ''; window.masterItems.filter(i => { if(!sq) return true; return (i.name && i.name.toLowerCase().includes(sq)) || (i.barcode && i.barcode.toLowerCase() === sq) || (i.brand && i.brand.toLowerCase().includes(sq)); }).forEach(item => { const card = document.createElement('div'); card.className = 'item-card'; card.onclick = () => addToCart(item.id); card.innerHTML = `<div class="name">${item.name}</div><div style="font-size:10px; color:#7f8c8d;">${item.brand||''}</div><div class="price">₹${item.sp}</div>`; grid.appendChild(card); }); };
+    window.addToCart = function(id) { const item = window.masterItems.find(i => i.id === id); if(!item) return; const ex = window.cart.find(c => c.id === id); if (ex) ex.qty += 1; else window.cart.push({ id: item.id, name: item.name, qty: 1, rate: item.sp, discType: '₹', discValue: 0 }); renderCart(); };
+    window.updateCart = function(i, f, v) { window.cart[i][f] = v; renderCart(); }; window.toggleDiscType = function(i) { window.cart[i].discType = window.cart[i].discType === '₹' ? '%' : '₹'; window.cart[i].discValue = 0; renderCart(); }; window.removeFromCart = function(i) { window.cart.splice(i, 1); renderCart(); }; window.clearCart = function() { window.cart = []; document.getElementById('posCustomer').value = 'Walk_In'; displayPartyBalance('posCustomer', 'posPartyBal'); renderCart(); };
+    window.renderCart = function() { const tbody = document.getElementById('cartBody'); tbody.innerHTML = ''; let sub = 0, disc = 0; window.cart.forEach((item, index) => { const base = item.qty * item.rate; let ld = item.discType === '₹' ? parseFloat(item.discValue)||0 : base * ((parseFloat(item.discValue)||0)/100); if (ld > base) ld = base; sub += base; disc += ld; tbody.innerHTML += `<tr><td><b>${item.name}</b></td><td><input type="number" class="cart-input" value="${item.qty}" min="1" onchange="updateCart(${index}, 'qty', this.value)"></td><td><input type="number" class="cart-input" value="${item.rate}" onchange="updateCart(${index}, 'rate', this.value)"></td><td><div class="disc-wrap"><input type="number" class="cart-input" style="width:40px;" value="${item.discValue}" onchange="updateCart(${index}, 'discValue', this.value)"><button class="disc-type" onclick="toggleDiscType(${index})">${item.discType}</button></div></td><td style="color:var(--green)">₹${(base-ld).toFixed(2)}</td><td><button class="btn-danger" style="border:none; border-radius:4px; cursor:pointer;" onclick="removeFromCart(${index})">X</button></td></tr>`; }); document.getElementById('posSubtotal').innerText = `₹${sub.toFixed(2)}`; document.getElementById('posTotalDiscount').innerText = `- ₹${disc.toFixed(2)}`; document.getElementById('posGrandTotal').innerText = `₹${(sub-disc).toFixed(2)}`; };
+    window.checkoutBill = async function() { if(window.cart.length === 0) return alert("Cart empty"); const payload = { date: new Date().toISOString(), module: 'Invoice', type: 'Sale', party: document.getElementById('posCustomer').value || "Walk_In", mode: document.getElementById('posMode').value, items: window.cart, amount: parseFloat(document.getElementById('posGrandTotal').innerText.replace('₹','')) }; await addDoc(collection(db, "vouchers_erp"), payload); alert("Sale Complete!"); clearCart(); await fetchCoreData(); displayPartyBalance('posCustomer', 'posPartyBal'); };
 
-    window.renderItemGrid = function(searchQuery) {
-        const grid = document.getElementById('posItemGrid'); grid.innerHTML = '';
-        window.masterItems.filter(i => {
-            if(!searchQuery) return true;
-            return (i.name && i.name.toLowerCase().includes(searchQuery)) || (i.barcode && i.barcode.toLowerCase() === searchQuery) || (i.brand && i.brand.toLowerCase().includes(searchQuery));
-        }).forEach(item => {
-            const card = document.createElement('div'); card.className = 'item-card'; card.onclick = () => addToCart(item.id);
-            card.innerHTML = `<div class="name">${item.name}</div><div style="font-size:10px; color:#7f8c8d;">${item.brand||''}</div><div class="price">₹${item.sp}</div>`;
-            grid.appendChild(card);
-        });
-    };
-
-    window.addToCart = function(itemId) {
-        const item = window.masterItems.find(i => i.id === itemId); if(!item) return;
-        const existing = window.cart.find(c => c.id === itemId);
-        if (existing) existing.qty += 1;
-        else window.cart.push({ id: item.id, name: item.name, qty: 1, rate: item.sp, discType: '₹', discValue: 0 });
-        renderCart();
-    };
-
-    window.updateCart = function(i, f, v) { window.cart[i][f] = v; renderCart(); };
-    window.toggleDiscType = function(i) { window.cart[i].discType = window.cart[i].discType === '₹' ? '%' : '₹'; window.cart[i].discValue = 0; renderCart(); };
-    window.removeFromCart = function(i) { window.cart.splice(i, 1); renderCart(); };
-    window.clearCart = function() { window.cart = []; document.getElementById('posCustomer').value = 'Walk_In'; displayPartyBalance('posCustomer', 'posPartyBal'); renderCart(); };
-
-    window.renderCart = function() {
-        const tbody = document.getElementById('cartBody'); tbody.innerHTML = '';
-        let sub = 0, disc = 0;
-        window.cart.forEach((item, index) => {
-            const base = item.qty * item.rate;
-            let ld = item.discType === '₹' ? parseFloat(item.discValue)||0 : base * ((parseFloat(item.discValue)||0)/100);
-            if (ld > base) ld = base;
-            sub += base; disc += ld;
-            tbody.innerHTML += `<tr>
-                <td><b>${item.name}</b></td>
-                <td><input type="number" class="cart-input" value="${item.qty}" min="1" onchange="updateCart(${index}, 'qty', this.value)"></td>
-                <td><input type="number" class="cart-input" value="${item.rate}" onchange="updateCart(${index}, 'rate', this.value)"></td>
-                <td><div class="disc-wrap"><input type="number" class="cart-input" style="width:40px;" value="${item.discValue}" onchange="updateCart(${index}, 'discValue', this.value)"><button class="disc-type" onclick="toggleDiscType(${index})">${item.discType}</button></div></td>
-                <td style="color:var(--green)">₹${(base-ld).toFixed(2)}</td>
-                <td><button class="btn-danger" style="border:none; border-radius:4px; cursor:pointer;" onclick="removeFromCart(${index})">X</button></td>
-            </tr>`;
-        });
-        document.getElementById('posSubtotal').innerText = `₹${sub.toFixed(2)}`;
-        document.getElementById('posTotalDiscount').innerText = `- ₹${disc.toFixed(2)}`;
-        document.getElementById('posGrandTotal').innerText = `₹${(sub-disc).toFixed(2)}`;
-    };
-
-    window.checkoutBill = async function() {
-        if(window.cart.length === 0) return alert("Cart empty");
-        const payload = {
-            date: new Date().toISOString(), module: 'Invoice', type: 'Sale',
-            party: document.getElementById('posCustomer').value || "Walk_In", mode: document.getElementById('posMode').value,
-            items: window.cart, amount: parseFloat(document.getElementById('posGrandTotal').innerText.replace('₹',''))
-        };
-        await addDoc(collection(db, "vouchers_erp"), payload);
-        alert("Sale Complete!"); clearCart(); await fetchCoreData(); displayPartyBalance('posCustomer', 'posPartyBal');
-    };
-
-    // --- PURCHASE / RETURN ENGINE ---
-    window.openInvoice = function(type, title) {
-        openView('invoice'); document.getElementById('invTitle').innerText = title; document.getElementById('invType').value = type;
-        window.currentInvoiceItems = []; window.renderInvoiceTable();
-        refreshActiveDropdowns(); displayPartyBalance('invParty', 'invPartyBal');
-    };
-
-    window.autoFillRate = function() {
-        const item = window.masterItems.find(i => i.id === document.getElementById('invItem').value);
-        if(item) document.getElementById('invRate').value = document.getElementById('invType').value.includes('Sale') ? item.sp : item.pp;
-    };
-
-    window.addInvoiceItem = function() {
-        const sel = document.getElementById('invItem'); const name = sel.options[sel.selectedIndex].text;
-        const qty = parseFloat(document.getElementById('invQty').value); const rate = parseFloat(document.getElementById('invRate').value);
-        if(name && qty && rate) { window.currentInvoiceItems.push({ name, qty, rate, total: qty * rate }); window.renderInvoiceTable(); }
-    };
-
-    window.renderInvoiceTable = function() {
-        const tbody = document.getElementById('invBody'); tbody.innerHTML = ""; let gt = 0;
-        window.currentInvoiceItems.forEach((i, idx) => {
-            gt += i.total; tbody.innerHTML += `<tr><td>${i.name}</td><td>${i.qty}</td><td>₹${i.rate}</td><td>₹${i.total}</td><td><button onclick="window.currentInvoiceItems.splice(${idx},1); window.renderInvoiceTable()">X</button></td></tr>`;
-        });
-        document.getElementById('invGrandTotal').innerText = gt.toFixed(2);
-    };
-
-    window.saveInvoice = async function() {
-        if(window.currentInvoiceItems.length === 0) return;
-        await addDoc(collection(db, "vouchers_erp"), {
-            date: document.getElementById('invDate').value, module: 'Invoice', type: document.getElementById('invType').value,
-            party: document.getElementById('invParty').value, mode: document.getElementById('invMode').value,
-            items: window.currentInvoiceItems, amount: parseFloat(document.getElementById('invGrandTotal').innerText)
-        });
-        alert("Saved!"); await fetchCoreData(); openInvoice(document.getElementById('invType').value, document.getElementById('invTitle').innerText);
-    };
+    // --- INVOICE ENGINE ---
+    window.openInvoice = function(type, title) { openView('invoice'); document.getElementById('invTitle').innerText = title; document.getElementById('invType').value = type; window.currentInvoiceItems = []; window.renderInvoiceTable(); refreshActiveDropdowns(); displayPartyBalance('invParty', 'invPartyBal'); };
+    window.autoFillRate = function() { const item = window.masterItems.find(i => i.id === document.getElementById('invItem').value); if(item) document.getElementById('invRate').value = document.getElementById('invType').value.includes('Sale') ? item.sp : item.pp; };
+    window.addInvoiceItem = function() { const sel = document.getElementById('invItem'); const name = sel.options[sel.selectedIndex].text; const qty = parseFloat(document.getElementById('invQty').value); const rate = parseFloat(document.getElementById('invRate').value); if(name && qty && rate) { window.currentInvoiceItems.push({ name, qty, rate, total: qty * rate }); window.renderInvoiceTable(); } };
+    window.renderInvoiceTable = function() { const tbody = document.getElementById('invBody'); tbody.innerHTML = ""; let gt = 0; window.currentInvoiceItems.forEach((i, idx) => { gt += i.total; tbody.innerHTML += `<tr><td>${i.name}</td><td>${i.qty}</td><td>₹${i.rate}</td><td>₹${i.total}</td><td><button onclick="window.currentInvoiceItems.splice(${idx},1); window.renderInvoiceTable()">X</button></td></tr>`; }); document.getElementById('invGrandTotal').innerText = gt.toFixed(2); };
+    window.saveInvoice = async function() { if(window.currentInvoiceItems.length === 0) return; await addDoc(collection(db, "vouchers_erp"), { date: document.getElementById('invDate').value, module: 'Invoice', type: document.getElementById('invType').value, party: document.getElementById('invParty').value, mode: document.getElementById('invMode').value, items: window.currentInvoiceItems, amount: parseFloat(document.getElementById('invGrandTotal').innerText) }); alert("Saved!"); await fetchCoreData(); openInvoice(document.getElementById('invType').value, document.getElementById('invTitle').innerText); };
 
     // --- VOUCHERS ---
-    window.openVoucher = function(type, title) {
-        openView('voucher'); document.getElementById('vouchTitle').innerText = title; document.getElementById('vouchType').value = type;
-        document.getElementById('vouchPartyWrap').style.display = type === 'Contra' ? 'none' : 'block';
-        if(type === 'Contra') document.getElementById('vouchModeWrap').innerHTML = `<label>Action</label><select id="vouchMode"><option value="CashToBank">Deposit Cash to Bank</option><option value="BankToCash">Withdraw from Bank</option></select>`;
-        else document.getElementById('vouchModeWrap').innerHTML = `<label>Transaction Mode</label><select id="vouchMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select>`;
-        refreshActiveDropdowns(); displayPartyBalance('vouchParty', 'vouchPartyBal');
-    };
+    window.openVoucher = function(type, title) { openView('voucher'); document.getElementById('vouchTitle').innerText = title; document.getElementById('vouchType').value = type; document.getElementById('vouchPartyWrap').style.display = type === 'Contra' ? 'none' : 'block'; if(type === 'Contra') document.getElementById('vouchModeWrap').innerHTML = `<label>Action</label><select id="vouchMode"><option value="CashToBank">Deposit Cash to Bank</option><option value="BankToCash">Withdraw from Bank</option></select>`; else document.getElementById('vouchModeWrap').innerHTML = `<label>Transaction Mode</label><select id="vouchMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select>`; refreshActiveDropdowns(); displayPartyBalance('vouchParty', 'vouchPartyBal'); };
+    window.saveVoucher = async function() { const type = document.getElementById('vouchType').value; const amt = parseFloat(document.getElementById('vouchAmt').value); if(!amt) return; await addDoc(collection(db, "vouchers_erp"), { date: document.getElementById('vouchDate').value, module: 'Voucher', type: type, party: type === 'Contra' ? 'Self' : document.getElementById('vouchParty').value, mode: type === 'Contra' ? document.getElementById('vouchMode').value : (type === 'Journal' ? 'Adjustment' : document.getElementById('vouchMode').value), amount: amt, remarks: document.getElementById('vouchRem').value }); alert("Voucher Saved!"); await fetchCoreData(); openVoucher(type, document.getElementById('vouchTitle').innerText); };
 
-    window.saveVoucher = async function() {
-        const type = document.getElementById('vouchType').value; const amt = parseFloat(document.getElementById('vouchAmt').value);
-        if(!amt) return;
-        await addDoc(collection(db, "vouchers_erp"), {
-            date: document.getElementById('vouchDate').value, module: 'Voucher', type: type,
-            party: type === 'Contra' ? 'Self' : document.getElementById('vouchParty').value,
-            mode: type === 'Contra' ? document.getElementById('vouchMode').value : (type === 'Journal' ? 'Adjustment' : document.getElementById('vouchMode').value),
-            amount: amt, remarks: document.getElementById('vouchRem').value
-        });
-        alert("Voucher Saved!"); await fetchCoreData(); openVoucher(type, document.getElementById('vouchTitle').innerText);
-    };
-
-    // --- REPORTS & DASHBOARD ---
+    // --- REPORTS ENGINE ---
     window.openReport = async function(type, title) {
         openView('reports'); document.getElementById('reportTitle').innerText = title; window.currentReport = type;
-        if(type === 'LedgerStatement') {
-            document.getElementById('reportFilters').style.display = 'flex';
-            const sel = document.getElementById('repLedgerSelect'); sel.innerHTML = '<option value="">-- Select Ledger --</option><option value="Cash">Cash</option><option value="Bank">Bank</option>';
-            window.masterParties.forEach(p => sel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
-        } else { document.getElementById('reportFilters').style.display = 'flex'; document.getElementById('repLedgerSelect').parentElement.style.display = 'none'; runReportLogic(); }
+        if(type === 'LedgerStatement') { document.getElementById('reportFilters').style.display = 'flex'; const sel = document.getElementById('repLedgerSelect'); sel.innerHTML = '<option value="">-- Select Ledger --</option>'; window.masterParties.forEach(p => sel.innerHTML += `<option value="${p.name}">${p.name} (${p.type})</option>`); } 
+        else { document.getElementById('reportFilters').style.display = 'flex'; document.getElementById('repLedgerSelect').parentElement.style.display = 'none'; runReportLogic(); }
     };
 
     window.runReportLogic = function() {
-        const type = window.currentReport; const c = document.getElementById('reportContainer'); let html = "<table><thead><tr>";
+        const type = window.currentReport; const c = document.getElementById('reportContainer'); let html = "<table>";
         if(type === 'PNL') {
-            let sales = 0, cogs = 0, exp = 0;
+            let sales = 0, cogs = 0, exp = 0, inc = 0;
+            // Add Opening Balances of Expense/Income ledgers
+            window.masterParties.forEach(p => {
+                if(p.type === 'Direct Expenses' || p.type === 'Indirect Expenses') exp += (p.balType==='Dr'?p.opBal:-p.opBal);
+                if(p.type === 'Direct Incomes' || p.type === 'Indirect Incomes') inc += (p.balType==='Cr'?p.opBal:-p.opBal);
+            });
+            // Vouchers
             window.allVouchers.forEach(v => {
                 const amt = parseFloat(v.amount || v.totalAmount || 0);
                 if(v.type === 'Sale') sales += amt; if(v.type === 'Return_Sale') sales -= amt;
-                if(v.type === 'Purchase') cogs += amt;
-                if(v.type === 'Payment' && window.masterParties.find(p => p.name === v.party)?.type === 'Expense') exp += amt;
+                if(v.type === 'Purchase') cogs += amt; if(v.type === 'Return_Purch') cogs -= amt;
+                const pType = window.masterParties.find(p => p.name === v.party)?.type;
+                if(v.type === 'Payment' && (pType === 'Direct Expenses' || pType === 'Indirect Expenses')) exp += amt;
+                if(v.type === 'Receipt' && (pType === 'Direct Incomes' || pType === 'Indirect Incomes')) inc += amt;
             });
-            let profit = sales - cogs - exp;
-            html = `<table style="width:500px;"><tr><th>Particulars</th><th>Amount (₹)</th></tr><tr><td>Gross Sales</td><td>${sales.toFixed(2)}</td></tr><tr><td>Cost of Purchases</td><td>${cogs.toFixed(2)}</td></tr><tr><td>Indirect Expenses</td><td>${exp.toFixed(2)}</td></tr><tr style="font-weight:bold; background:#eafaf1; color:${profit>=0?'#27ae60':'#c0392b'};"><td>NET PROFIT / (LOSS)</td><td>${profit.toFixed(2)}</td></tr></table>`;
+            let profit = (sales + inc) - cogs - exp;
+            html += `<tr><th colspan="2" style="font-size:18px;">Trading & Profit and Loss A/c</th></tr>
+                <tr class="acct-group"><td colspan="2">Incomes</td></tr>
+                <tr><td class="acct-sub">Gross Sales</td><td>${sales.toFixed(2)}</td></tr>
+                <tr><td class="acct-sub">Other Incomes</td><td>${inc.toFixed(2)}</td></tr>
+                <tr class="acct-group"><td colspan="2">Expenses</td></tr>
+                <tr><td class="acct-sub">Cost of Purchases</td><td>${cogs.toFixed(2)}</td></tr>
+                <tr><td class="acct-sub">Indirect Expenses</td><td>${exp.toFixed(2)}</td></tr>
+                <tr class="acct-total" style="background:#eafaf1; color:${profit>=0?'#27ae60':'#c0392b'}; font-size:18px;"><td>NET PROFIT / (LOSS)</td><td>${profit.toFixed(2)}</td></tr></table>`;
+        }
+        else if(type === 'BS') {
+            let assets = 0, liab = 0;
+            let groupTotals = {};
+            window.masterParties.forEach(p => {
+                if(!['Sundry Debtors','Bank Accounts','Cash-in-hand','Fixed Assets','Sundry Creditors','Capital Account','Loans (Liability)','Duties & Taxes'].includes(p.type)) return;
+                const b = getLedgerBalance(p.name);
+                if(!groupTotals[p.type]) groupTotals[p.type] = 0;
+                if(b.type === 'Dr') { groupTotals[p.type] += b.bal; assets += b.bal; } else { groupTotals[p.type] += b.bal; liab += b.bal; }
+            });
+            html += `<tr><th width="50%">Liabilities</th><th width="50%">Assets</th></tr><tr><td style="vertical-align:top;"><table style="margin:0;">`;
+            // Liab Side
+            ['Capital Account','Loans (Liability)','Sundry Creditors','Duties & Taxes'].forEach(g => { if(groupTotals[g]) html += `<tr><td class="acct-group">${g}</td><td>${groupTotals[g].toFixed(2)}</td></tr>`; });
+            html += `</table></td><td style="vertical-align:top;"><table style="margin:0;">`;
+            // Asset Side
+            ['Fixed Assets','Sundry Debtors','Bank Accounts','Cash-in-hand'].forEach(g => { if(groupTotals[g]) html += `<tr><td class="acct-group">${g}</td><td>${groupTotals[g].toFixed(2)}</td></tr>`; });
+            html += `</table></td></tr><tr class="acct-total" style="font-size:18px; background:#f8f9fa;"><td>Total Liabilities: ₹${liab.toFixed(2)}</td><td>Total Assets: ₹${assets.toFixed(2)}</td></tr></table>`;
+        }
+        else if(type === 'TB') {
+            html += "<thead><tr><th>Ledger Account</th><th>Group</th><th>Debit Balance (Dr)</th><th>Credit Balance (Cr)</th></tr></thead><tbody>";
+            let tDr = 0, tCr = 0;
+            window.masterParties.forEach(p => {
+                const b = getLedgerBalance(p.name);
+                if(b.bal > 0) {
+                    if(b.type === 'Dr') { tDr += b.bal; html += `<tr><td>${p.name}</td><td>${p.type}</td><td>${b.bal.toFixed(2)}</td><td></td></tr>`; }
+                    else { tCr += b.bal; html += `<tr><td>${p.name}</td><td>${p.type}</td><td></td><td>${b.bal.toFixed(2)}</td></tr>`; }
+                }
+            });
+            html += `<tr class="acct-total" style="background:#e8f4f8;"><td>Grand Total</td><td></td><td>₹${tDr.toFixed(2)}</td><td>₹${tCr.toFixed(2)}</td></tr></tbody></table>`;
         }
         else if(type === 'CashFlow') {
-            html += "<th>Date</th><th>Type</th><th>Ref</th><th>In (+)</th><th>Out (-)</th></tr></thead><tbody>";
+            html += "<thead><tr><th>Date</th><th>Type</th><th>Ref</th><th>Inflow (+)</th><th>Outflow (-)</th></tr></thead><tbody>";
             let tIn = 0, tOut = 0;
             window.allVouchers.forEach(v => {
                 const amt = parseFloat(v.amount || v.totalAmount || 0);
@@ -628,7 +576,7 @@
             html += `</tbody></table><h3>Net Change: ₹${(tIn - tOut).toFixed(2)}</h3>`;
         }
         else if(type === 'ItemsFlow') {
-            html += "<th>Item Name</th><th>Bought</th><th>Sold</th></tr></thead><tbody>";
+            html += "<thead><tr><th>Item Name</th><th>Total Bought</th><th>Total Sold</th></tr></thead><tbody>";
             let sm = {};
             window.allVouchers.forEach(v => {
                 if(v.items) v.items.forEach(i => {
@@ -641,17 +589,24 @@
         }
         else if(type === 'LedgerStatement') {
             const p = document.getElementById('repLedgerSelect').value; if(!p) return;
-            html += "<th>Date</th><th>Type</th><th>Dr</th><th>Cr</th><th>Bal</th></tr></thead><tbody>";
+            html += "<thead><tr><th>Date</th><th>Voucher Type</th><th>Ref/Mode</th><th>Debit (Dr)</th><th>Credit (Cr)</th><th>Balance</th></tr></thead><tbody>";
+            
+            // Opening Balance Row
+            const ledger = window.masterParties.find(l => l.name === p);
             let bal = 0;
+            if(ledger && ledger.opBal > 0) {
+                bal = ledger.balType === 'Dr' ? ledger.opBal : -ledger.opBal;
+                html += `<tr><td>Opening Balance</td><td>-</td><td>-</td><td>${ledger.balType==='Dr'?ledger.opBal:''}</td><td>${ledger.balType==='Cr'?ledger.opBal:''}</td><td>${Math.abs(bal)} ${bal>=0?'Dr':'Cr'}</td></tr>`;
+            }
+
             window.allVouchers.filter(v => v.party === p || v.mode === p || (v.type==='Contra' && v.mode.includes(p))).forEach(v => {
-                const amt = parseFloat(v.amount || v.totalAmount || 0);
-                let dr = 0, cr = 0;
+                const amt = parseFloat(v.amount || v.totalAmount || 0); let dr = 0, cr = 0;
                 if(v.type === 'Sale' || v.type === 'Payment' || (v.mode === 'CashToBank' && p === 'Bank')) dr = amt;
                 if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && p === 'Cash')) cr = amt;
                 bal += (dr - cr);
-                html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${dr||''}</td><td>${cr||''}</td><td>${Math.abs(bal).toFixed(2)} ${bal>0?'Dr':'Cr'}</td></tr>`;
+                html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${dr||''}</td><td>${cr||''}</td><td>${Math.abs(bal).toFixed(2)} ${bal>=0?'Dr':'Cr'}</td></tr>`;
             });
-            html += `</tbody></table>`;
+            html += `<tr class="acct-total" style="background:#e8f4f8;"><td colspan="5" style="text-align:right;">Closing Balance:</td><td>${Math.abs(bal).toFixed(2)} ${bal>=0?'Dr':'Cr'}</td></tr></tbody></table>`;
         }
         c.innerHTML = html;
     };
@@ -659,6 +614,15 @@
     window.calculateDashboard = async function() {
         if(window.allVouchers.length === 0) await fetchCoreData();
         let cash = 0, bank = 0, dr = 0, cr = 0, sales = 0, purch = 0;
+        
+        // Add Opening Balances to Dashboard metrics
+        window.masterParties.forEach(p => {
+            if(p.type === 'Cash-in-hand' && p.balType === 'Dr') cash += p.opBal;
+            if(p.type === 'Bank Accounts' && p.balType === 'Dr') bank += p.opBal;
+            if(p.type === 'Sundry Debtors') p.balType === 'Dr' ? dr += p.opBal : dr -= p.opBal;
+            if(p.type === 'Sundry Creditors') p.balType === 'Cr' ? cr += p.opBal : cr -= p.opBal;
+        });
+
         window.allVouchers.forEach(v => {
             const amt = parseFloat(v.amount || v.totalAmount || 0);
             if(v.type === 'Sale') sales += amt; if(v.type === 'Purchase') purch += amt;
