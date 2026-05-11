@@ -5,24 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Glacier Ultimate ERP</title>
     <style>
-        :root { --sidebar: #2c3e50; --sidebar-hover: #34495e; --active: #3498db; --bg: #ecf0f1; --card: #ffffff; --text: #333; --border: #bdc3c7; --green: #27ae60; --red: #c0392b; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+        :root { --nav-bg: #2c3e50; --nav-hover: #34495e; --active: #3498db; --bg: #ecf0f1; --card: #ffffff; --text: #333; --border: #bdc3c7; --green: #27ae60; --red: #c0392b; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Layout */
-        .sidebar { width: 260px; background: var(--sidebar); color: white; display: flex; flex-direction: column; overflow-y: auto; }
-        .main-content { flex: 1; padding: 25px; overflow-y: auto; }
+        /* TOP NAVIGATION BAR */
+        .navbar { background: var(--nav-bg); color: white; display: flex; align-items: center; padding: 0 20px; height: 60px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; }
+        .brand { font-size: 20px; font-weight: bold; margin-right: 30px; letter-spacing: 1px; color: #f1c40f; }
         
-        /* Sidebar Styles */
-        .brand { padding: 20px; font-size: 22px; font-weight: bold; text-align: center; background: #1a252f; border-bottom: 1px solid #34495e; }
-        .menu-group { font-size: 12px; text-transform: uppercase; color: #7f8c8d; padding: 15px 20px 5px; font-weight: bold; letter-spacing: 1px; }
-        .menu-item { padding: 12px 20px; cursor: pointer; transition: 0.2s; font-size: 15px; border-left: 3px solid transparent; }
-        .menu-item:hover { background: var(--sidebar-hover); }
-        .menu-item.active { background: #1a252f; border-left-color: var(--active); color: var(--active); font-weight: bold; }
+        /* DROPDOWN MENU STYLES */
+        .nav-menu { display: flex; height: 100%; }
+        .dropdown { position: relative; display: inline-block; height: 100%; }
+        .dropbtn { background: transparent; color: white; border: none; padding: 0 20px; font-size: 15px; font-weight: 600; cursor: pointer; height: 100%; transition: 0.2s; }
+        .dropdown:hover .dropbtn { background: var(--active); }
         
-        /* Main Area Styles */
-        .view-section { display: none; background: var(--card); padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .view-section.active { display: block; }
-        h2.view-title { margin-top: 0; color: var(--sidebar); border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 20px; }
+        .dropdown-content { display: none; position: absolute; background-color: white; min-width: 220px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1001; border-radius: 0 0 4px 4px; border-top: 3px solid var(--active); }
+        .dropdown-content a { color: var(--text); padding: 12px 16px; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .dropdown-content a:hover { background-color: #f8f9fa; color: var(--active); font-weight: 600; padding-left: 20px; transition: 0.2s; }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* Main Content Area */
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; display: flex; justify-content: center; }
+        .content-wrapper { width: 100%; max-width: 1200px; }
+        
+        /* Views */
+        .view-section { display: none; background: var(--card); padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        h2.view-title { margin-top: 0; color: var(--nav-bg); border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 25px; }
 
         /* Grid & Forms */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -41,11 +51,11 @@
         /* Tables */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background: #f8f9fa; color: var(--sidebar); font-weight: bold; }
+        th { background: #f8f9fa; color: var(--nav-bg); font-weight: bold; }
         tr:nth-child(even) { background-color: #f9f9f9; }
 
         /* Dashboard Cards */
-        .dash-card { padding: 20px; border-radius: 8px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .dash-card { padding: 20px; border-radius: 8px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; }
         .dash-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; opacity: 0.9; }
         .dash-card .amt { font-size: 28px; font-weight: bold; }
 
@@ -55,145 +65,173 @@
 </head>
 <body>
 
-    <!-- SIDEBAR TREE -->
-    <div class="sidebar">
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="navbar">
         <div class="brand">🍦 Glacier ERP</div>
         
-        <div class="menu-item active" id="nav-dashboard" onclick="openView('dashboard', this)">📊 Dashboard</div>
-        
-        <div class="menu-group">Transactions</div>
-        <div class="menu-item" id="nav-pos" onclick="openInvoice('Sale', 'POS Invoicing', this)">🛒 POS Invoicing</div>
-        <div class="menu-item" id="nav-purch" onclick="openInvoice('Purchase', 'Purchase Invoice', this)">📦 Purchase Invoice</div>
-        <div class="menu-item" id="nav-sret" onclick="openInvoice('Return_Sale', 'Sales Return', this)">📉 Sales Return</div>
-        <div class="menu-item" id="nav-dbnote" onclick="openInvoice('Return_Purch', 'Debit Note', this)">🧾 Debit Note</div>
-        <div class="menu-item" id="nav-crnote" onclick="openVoucher('Credit_Note', 'Credit Note', this)">🏷️ Credit Note</div>
-        <div class="menu-item" id="nav-rect" onclick="openVoucher('Receipt', 'Receipt', this)">📥 Receipt</div>
-        <div class="menu-item" id="nav-pay" onclick="openVoucher('Payment', 'Payment', this)">📤 Payment</div>
-        <div class="menu-item" id="nav-jour" onclick="openVoucher('Journal', 'Journal', this)">📓 Journal</div>
-        <div class="menu-item" id="nav-contra" onclick="openVoucher('Contra', 'Contra', this)">🔄 Contra</div>
+        <div class="nav-menu">
+            <!-- Home -->
+            <div class="dropdown">
+                <button class="dropbtn" onclick="openView('dashboard')">Home / Dash</button>
+            </div>
 
-        <div class="menu-group">Reports</div>
-        <div class="menu-item" onclick="openReport('PNL', 'Profit & Loss Statement', this)">📈 P&L</div>
-        <div class="menu-item" onclick="openReport('BS', 'Balance Sheet', this)">⚖️ Balance Sheet</div>
-        <div class="menu-item" onclick="openReport('ItemsFlow', 'Items Flow (Stock)', this)">📦 Items Flow</div>
-        <div class="menu-item" onclick="openReport('CashFlow', 'Cash & Bank Flow', this)">💸 Cash Flow</div>
-        <div class="menu-item" onclick="openReport('LedgerDetails', 'Ledger Details', this)">📖 Ledger Details</div>
-        <div class="menu-item" onclick="openReport('LedgerStatement', 'Party Ledger Statement', this)">📜 Ledger Statement</div>
+            <!-- Invoicing Menu -->
+            <div class="dropdown">
+                <button class="dropbtn">Sales & Purchases ▾</button>
+                <div class="dropdown-content">
+                    <a onclick="openInvoice('Sale', 'POS Invoicing')">🛒 POS Invoicing (Bill of Supply)</a>
+                    <a onclick="openInvoice('Purchase', 'Purchase Invoice')">📦 Purchase Entry</a>
+                    <a onclick="openInvoice('Return_Sale', 'Sales Return')">📉 Sales Return (Inward)</a>
+                    <a onclick="openInvoice('Return_Purch', 'Debit Note')">🧾 Debit Note (Purchase Return)</a>
+                    <a onclick="openVoucher('Credit_Note', 'Credit Note')">🏷️ Credit Note</a>
+                </div>
+            </div>
 
-        <div class="menu-group">Setup</div>
-        <div class="menu-item" onclick="openView('masters', this)">⚙️ Masters (Add Item/Party)</div>
-    </div>
+            <!-- Accounting Menu -->
+            <div class="dropdown">
+                <button class="dropbtn">Accounting ▾</button>
+                <div class="dropdown-content">
+                    <a onclick="openVoucher('Receipt', 'Receipt')">📥 Receipt (Receive Money)</a>
+                    <a onclick="openVoucher('Payment', 'Payment')">📤 Payment (Send Money)</a>
+                    <a onclick="openVoucher('Journal', 'Journal')">📓 Journal (Adjustments)</a>
+                    <a onclick="openVoucher('Contra', 'Contra')">🔄 Contra (Bank/Cash Transfer)</a>
+                </div>
+            </div>
+
+            <!-- Reports Menu -->
+            <div class="dropdown">
+                <button class="dropbtn">Display Reports ▾</button>
+                <div class="dropdown-content">
+                    <a onclick="openReport('PNL', 'Profit & Loss Statement')">📈 Profit & Loss A/c</a>
+                    <a onclick="openReport('BS', 'Balance Sheet')">⚖️ Balance Sheet</a>
+                    <a onclick="openReport('ItemsFlow', 'Items Flow (Stock)')">📦 Inventory Flow</a>
+                    <a onclick="openReport('CashFlow', 'Cash & Bank Flow')">💸 Cash/Bank Book</a>
+                    <a onclick="openReport('LedgerDetails', 'Ledger Details')">📖 Ledger Overview</a>
+                    <a onclick="openReport('LedgerStatement', 'Party Ledger Statement')">📜 Ledger Statement</a>
+                </div>
+            </div>
+
+            <!-- Masters Menu -->
+            <div class="dropdown">
+                <button class="dropbtn">Administration ▾</button>
+                <div class="dropdown-content">
+                    <a onclick="openView('masters')">⚙️ Setup Masters (Items/Ledgers)</a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <!-- MAIN CONTENT AREA -->
     <div class="main-content">
-        
-        <!-- DASHBOARD -->
-        <div id="view-dashboard" class="view-section active">
-            <h2 class="view-title">Financial Dashboard</h2>
-            <div class="grid-4">
-                <div class="dash-card" style="background: #27ae60;"><h3>Cash in Hand</h3><div class="amt" id="dCash">₹0.00</div></div>
-                <div class="dash-card" style="background: #2980b9;"><h3>Bank Balance</h3><div class="amt" id="dBank">₹0.00</div></div>
-                <div class="dash-card" style="background: #f39c12;"><h3>To Receive (Debtors)</h3><div class="amt" id="dDebt">₹0.00</div></div>
-                <div class="dash-card" style="background: #e74c3c;"><h3>To Pay (Creditors)</h3><div class="amt" id="dCred">₹0.00</div></div>
-            </div>
-            <div class="grid-2" style="margin-top: 20px;">
-                <div class="dash-card" style="background: #8e44ad;"><h3>Total Sales</h3><div class="amt" id="dSales">₹0.00</div></div>
-                <div class="dash-card" style="background: #34495e;"><h3>Total Purchases</h3><div class="amt" id="dPurch">₹0.00</div></div>
-            </div>
-        </div>
-
-        <!-- INVOICE ENGINE (POS / Purchase / Returns) -->
-        <div id="view-invoice" class="view-section">
-            <h2 class="view-title" id="invTitle">Invoice</h2>
-            <input type="hidden" id="invType">
+        <div class="content-wrapper">
             
-            <div class="grid-3" style="background: var(--bg); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                <div class="form-group"><label>Date</label><input type="date" id="invDate"></div>
-                <div class="form-group"><label>Select Party</label><select id="invParty"></select></div>
-                <div class="form-group"><label>Payment Mode</label>
-                    <select id="invMode"><option value="Cash">Cash</option><option value="Bank">Bank/UPI</option><option value="Credit">Credit (Udhaar)</option></select>
+            <!-- DASHBOARD -->
+            <div id="view-dashboard" class="view-section active">
+                <h2 class="view-title">Financial Dashboard</h2>
+                <div class="grid-4">
+                    <div class="dash-card" style="background: #27ae60;"><h3>Cash in Hand</h3><div class="amt" id="dCash">₹0.00</div></div>
+                    <div class="dash-card" style="background: #2980b9;"><h3>Bank Balance</h3><div class="amt" id="dBank">₹0.00</div></div>
+                    <div class="dash-card" style="background: #f39c12;"><h3>To Receive (Debtors)</h3><div class="amt" id="dDebt">₹0.00</div></div>
+                    <div class="dash-card" style="background: #e74c3c;"><h3>To Pay (Creditors)</h3><div class="amt" id="dCred">₹0.00</div></div>
+                </div>
+                <div class="grid-2" style="margin-top: 20px;">
+                    <div class="dash-card" style="background: #8e44ad;"><h3>Total Sales</h3><div class="amt" id="dSales">₹0.00</div></div>
+                    <div class="dash-card" style="background: #34495e;"><h3>Total Purchases</h3><div class="amt" id="dPurch">₹0.00</div></div>
                 </div>
             </div>
 
-            <div class="grid-4" style="align-items: end;">
-                <div class="form-group"><label>Item</label><select id="invItem" onchange="autoFillRate()"></select></div>
-                <div class="form-group"><label>Qty</label><input type="number" id="invQty" value="1"></div>
-                <div class="form-group"><label>Rate (₹)</label><input type="number" id="invRate"></div>
-                <button class="btn btn-primary" style="margin-bottom: 15px;" onclick="addInvoiceItem()">+ Add Item</button>
-            </div>
-
-            <table id="invTable">
-                <thead><tr><th>Item Name</th><th>Qty</th><th>Rate</th><th>Total</th><th>X</th></tr></thead>
-                <tbody id="invBody"></tbody>
-            </table>
-            
-            <div style="text-align: right; margin-top: 20px;">
-                <h2 style="color: var(--active); margin: 0 0 15px 0;">Grand Total: ₹<span id="invGrandTotal">0.00</span></h2>
-                <button class="btn btn-success" style="width: 200px;" onclick="saveInvoice()">💾 Save Document</button>
-            </div>
-        </div>
-
-        <!-- VOUCHER ENGINE (Receipt/Payment/Contra/Journal) -->
-        <div id="view-voucher" class="view-section">
-            <h2 class="view-title" id="vouchTitle">Voucher</h2>
-            <input type="hidden" id="vouchType">
-            
-            <div style="max-width: 600px; margin: 0 auto;">
-                <div class="form-group"><label>Date</label><input type="date" id="vouchDate"></div>
+            <!-- INVOICE ENGINE (POS / Purchase / Returns) -->
+            <div id="view-invoice" class="view-section">
+                <h2 class="view-title" id="invTitle">Invoice</h2>
+                <input type="hidden" id="invType">
                 
-                <div class="form-group" id="vouchPartyWrap"><label id="vouchPartyLbl">Select Ledger</label><select id="vouchParty"></select></div>
-                
-                <div class="form-group" id="vouchModeWrap"><label>Transaction Mode</label>
-                    <select id="vouchMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select>
-                </div>
-
-                <div class="form-group"><label>Amount (₹)</label><input type="number" id="vouchAmt" placeholder="0.00"></div>
-                <div class="form-group"><label>Narration / Remarks</label><input type="text" id="vouchRem" placeholder="Details of transaction"></div>
-                
-                <button class="btn btn-success" onclick="saveVoucher()">💾 Save Voucher</button>
-            </div>
-        </div>
-
-        <!-- DYNAMIC REPORTS VIEWER -->
-        <div id="view-reports" class="view-section">
-            <h2 class="view-title" id="reportTitle">Report</h2>
-            
-            <!-- Filters (Shown only for Ledger Statement) -->
-            <div class="report-header" id="reportFilters" style="display: none;">
-                <div style="width: 300px;">
-                    <label>Select Party / Ledger</label>
-                    <select id="repLedgerSelect" onchange="runReportLogic()"></select>
-                </div>
-                <button class="btn btn-primary" style="width: auto;" onclick="window.print()">🖨️ Print Report</button>
-            </div>
-
-            <div id="reportContainer">
-                <!-- Report tables generated here by JS -->
-            </div>
-        </div>
-
-        <!-- MASTERS -->
-        <div id="view-masters" class="view-section">
-            <h2 class="view-title">Masters Setup</h2>
-            <div class="grid-2">
-                <div style="background: var(--bg); padding: 20px; border-radius: 8px;">
-                    <h3 style="margin-top:0;">👥 Add Ledger/Party</h3>
-                    <div class="form-group"><label>Type</label><select id="mPartyType"><option value="Customer">Customer</option><option value="Supplier">Supplier</option><option value="Expense">Expense Ledger</option></select></div>
-                    <div class="form-group"><label>Name</label><input type="text" id="mPartyName"></div>
-                    <button class="btn btn-primary" onclick="saveParty()">Save Ledger</button>
-                </div>
-                <div style="background: var(--bg); padding: 20px; border-radius: 8px;">
-                    <h3 style="margin-top:0;">📦 Add Item</h3>
-                    <div class="form-group"><label>Item Name</label><input type="text" id="mItemName"></div>
-                    <div class="grid-2">
-                        <div class="form-group"><label>Buy Price</label><input type="number" id="mItemPP"></div>
-                        <div class="form-group"><label>Sell Price</label><input type="number" id="mItemSP"></div>
+                <div class="grid-3" style="background: var(--bg); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                    <div class="form-group"><label>Date</label><input type="date" id="invDate"></div>
+                    <div class="form-group"><label>Select Party</label><select id="invParty"></select></div>
+                    <div class="form-group"><label>Payment Mode</label>
+                        <select id="invMode"><option value="Cash">Cash</option><option value="Bank">Bank/UPI</option><option value="Credit">Credit (Udhaar)</option></select>
                     </div>
-                    <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+                </div>
+
+                <div class="grid-4" style="align-items: end;">
+                    <div class="form-group"><label>Item</label><select id="invItem" onchange="autoFillRate()"></select></div>
+                    <div class="form-group"><label>Qty</label><input type="number" id="invQty" value="1"></div>
+                    <div class="form-group"><label>Rate (₹)</label><input type="number" id="invRate"></div>
+                    <button class="btn btn-primary" style="margin-bottom: 15px;" onclick="addInvoiceItem()">+ Add Item</button>
+                </div>
+
+                <table id="invTable">
+                    <thead><tr><th>Item Name</th><th>Qty</th><th>Rate</th><th>Total</th><th>X</th></tr></thead>
+                    <tbody id="invBody"></tbody>
+                </table>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <h2 style="color: var(--active); margin: 0 0 15px 0;">Grand Total: ₹<span id="invGrandTotal">0.00</span></h2>
+                    <button class="btn btn-success" style="width: 200px;" onclick="saveInvoice()">💾 Save Document</button>
                 </div>
             </div>
-        </div>
 
+            <!-- VOUCHER ENGINE (Receipt/Payment/Contra/Journal) -->
+            <div id="view-voucher" class="view-section">
+                <h2 class="view-title" id="vouchTitle">Voucher</h2>
+                <input type="hidden" id="vouchType">
+                
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div class="form-group"><label>Date</label><input type="date" id="vouchDate"></div>
+                    
+                    <div class="form-group" id="vouchPartyWrap"><label id="vouchPartyLbl">Select Ledger</label><select id="vouchParty"></select></div>
+                    
+                    <div class="form-group" id="vouchModeWrap"><label>Transaction Mode</label>
+                        <select id="vouchMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select>
+                    </div>
+
+                    <div class="form-group"><label>Amount (₹)</label><input type="number" id="vouchAmt" placeholder="0.00"></div>
+                    <div class="form-group"><label>Narration / Remarks</label><input type="text" id="vouchRem" placeholder="Details of transaction"></div>
+                    
+                    <button class="btn btn-success" onclick="saveVoucher()">💾 Save Voucher</button>
+                </div>
+            </div>
+
+            <!-- DYNAMIC REPORTS VIEWER -->
+            <div id="view-reports" class="view-section">
+                <h2 class="view-title" id="reportTitle">Report</h2>
+                
+                <div class="report-header" id="reportFilters" style="display: none;">
+                    <div style="width: 300px;">
+                        <label>Select Party / Ledger</label>
+                        <select id="repLedgerSelect" onchange="runReportLogic()"></select>
+                    </div>
+                    <button class="btn btn-primary" style="width: auto;" onclick="window.print()">🖨️ Print Report</button>
+                </div>
+
+                <div id="reportContainer">
+                    <!-- Report tables generated here by JS -->
+                </div>
+            </div>
+
+            <!-- MASTERS -->
+            <div id="view-masters" class="view-section">
+                <h2 class="view-title">Masters Setup</h2>
+                <div class="grid-2">
+                    <div style="background: var(--bg); padding: 20px; border-radius: 8px;">
+                        <h3 style="margin-top:0;">👥 Add Ledger/Party</h3>
+                        <div class="form-group"><label>Type</label><select id="mPartyType"><option value="Customer">Customer</option><option value="Supplier">Supplier</option><option value="Expense">Expense Ledger</option></select></div>
+                        <div class="form-group"><label>Name</label><input type="text" id="mPartyName"></div>
+                        <button class="btn btn-primary" onclick="saveParty()">Save Ledger</button>
+                    </div>
+                    <div style="background: var(--bg); padding: 20px; border-radius: 8px;">
+                        <h3 style="margin-top:0;">📦 Add Item</h3>
+                        <div class="form-group"><label>Item Name</label><input type="text" id="mItemName"></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Buy Price</label><input type="number" id="mItemPP"></div>
+                            <div class="form-group"><label>Sell Price</label><input type="number" id="mItemSP"></div>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
 <!-- FIREBASE & LOGIC -->
@@ -213,40 +251,31 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Global State
     window.masterParties = [];
     window.masterItems = [];
     window.currentInvoiceItems = [];
     window.allVouchers = [];
     window.currentReport = "";
 
-    // Set today's date in date pickers
     document.getElementById('invDate').valueAsDate = new Date();
     document.getElementById('vouchDate').valueAsDate = new Date();
 
     // --- NAVIGATION LOGIC ---
-    window.setActiveMenu = function(element) {
-        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-        if(element) element.classList.add('active');
+    // Note: In a top-menu layout, the dropdown hides automatically. We just switch the view.
+    window.openView = function(viewId) {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    };
-
-    window.openView = function(viewId, element) {
-        setActiveMenu(element);
         document.getElementById(`view-${viewId}`).classList.add('active');
         if(viewId === 'dashboard') calculateDashboard();
     };
 
-    window.openInvoice = function(type, title, element) {
-        setActiveMenu(element);
-        document.getElementById('view-invoice').classList.add('active');
+    window.openInvoice = function(type, title) {
+        openView('invoice');
         document.getElementById('invTitle').innerText = title;
         document.getElementById('invType').value = type;
         
         window.currentInvoiceItems = [];
         window.renderInvoiceTable();
         
-        // Filter Parties based on Sale vs Purchase
         const pSelect = document.getElementById('invParty');
         pSelect.innerHTML = '<option value="Cash_Counter">Cash Counter (Walk-in)</option>';
         const filterType = type.includes('Sale') ? 'Customer' : 'Supplier';
@@ -255,9 +284,8 @@
         });
     };
 
-    window.openVoucher = function(type, title, element) {
-        setActiveMenu(element);
-        document.getElementById('view-voucher').classList.add('active');
+    window.openVoucher = function(type, title) {
+        openView('voucher');
         document.getElementById('vouchTitle').innerText = title;
         document.getElementById('vouchType').value = type;
         
@@ -266,19 +294,17 @@
         const pLbl = document.getElementById('vouchPartyLbl');
         const pSelect = document.getElementById('vouchParty');
 
-        // Reset UI
         pWrap.style.display = 'block'; mWrap.style.display = 'block';
         pSelect.innerHTML = '<option value="">-- Select Ledger --</option>';
 
         if(type === 'Receipt') { pLbl.innerText = "Receive From (Customer)"; window.masterParties.forEach(p => pSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`); }
         if(type === 'Payment') { pLbl.innerText = "Pay To (Supplier/Expense)"; window.masterParties.forEach(p => pSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`); }
         if(type === 'Contra') { pWrap.style.display = 'none'; mWrap.innerHTML = `<label>Action</label><select id="vouchMode"><option value="CashToBank">Deposit Cash to Bank</option><option value="BankToCash">Withdraw Cash from Bank</option></select>`; }
-        if(type === 'Journal') { pLbl.innerText = "Adjust Ledger (Narration specifies details)"; window.masterParties.forEach(p => pSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`); mWrap.style.display = 'none'; }
+        if(type === 'Journal' || type === 'Credit_Note') { pLbl.innerText = "Adjust Ledger (Narration specifies details)"; window.masterParties.forEach(p => pSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`); mWrap.style.display = 'none'; }
     };
 
-    window.openReport = async function(type, title, element) {
-        setActiveMenu(element);
-        document.getElementById('view-reports').classList.add('active');
+    window.openReport = async function(type, title) {
+        openView('reports');
         document.getElementById('reportTitle').innerText = title;
         window.currentReport = type;
         
@@ -294,7 +320,7 @@
             container.innerHTML = "Please select a ledger above.";
         } else {
             filters.style.display = 'flex';
-            document.getElementById('repLedgerSelect').parentElement.style.display = 'none'; // Hide dropdown, keep print button
+            document.getElementById('repLedgerSelect').parentElement.style.display = 'none'; 
             runReportLogic();
         }
     };
@@ -313,7 +339,6 @@
         iSelect.innerHTML = '<option value="">-- Choose Item --</option>';
         window.masterItems.forEach(i => iSelect.innerHTML += `<option value="${i.id}">${i.name}</option>`);
 
-        // Fetch all transactions for reporting
         snap = await getDocs(query(collection(db, "vouchers_erp"), orderBy("date", "asc")));
         snap.forEach(doc => window.allVouchers.push({ id: doc.id, ...doc.data() }));
     };
@@ -357,7 +382,7 @@
             items: window.currentInvoiceItems, amount: parseFloat(document.getElementById('invGrandTotal').innerText)
         };
         await addDoc(collection(db, "vouchers_erp"), payload);
-        alert("Saved!"); window.fetchCoreData(); openInvoice(payload.type, document.getElementById('invTitle').innerText, null);
+        alert("Saved!"); window.fetchCoreData(); openInvoice(payload.type, document.getElementById('invTitle').innerText);
     };
 
     window.saveVoucher = async function() {
@@ -368,11 +393,11 @@
             date: document.getElementById('vouchDate').value,
             module: 'Voucher', type: type,
             party: type === 'Contra' ? 'Self' : document.getElementById('vouchParty').value,
-            mode: type === 'Contra' ? document.getElementById('vouchMode').value : (type === 'Journal' ? 'Journal' : document.getElementById('vouchMode').value),
+            mode: type === 'Contra' ? document.getElementById('vouchMode').value : (type === 'Journal' || type === 'Credit_Note' ? 'Adjustment' : document.getElementById('vouchMode').value),
             amount: amt, remarks: document.getElementById('vouchRem').value
         };
         await addDoc(collection(db, "vouchers_erp"), payload);
-        alert("Saved!"); window.fetchCoreData(); openVoucher(type, document.getElementById('vouchTitle').innerText, null);
+        alert("Saved!"); window.fetchCoreData(); openVoucher(type, document.getElementById('vouchTitle').innerText);
     };
 
     window.saveParty = async function() {
@@ -447,7 +472,6 @@
             html += "<th>Date</th><th>Voucher Type</th><th>Ref/Mode</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead><tbody>";
             let bal = 0;
             window.allVouchers.filter(v => v.party === party || v.mode === party || (v.type==='Contra' && v.mode.includes(party))).forEach(v => {
-                // Simplified Ledger Logic
                 let dr = 0, cr = 0;
                 if(v.type === 'Sale' || v.type === 'Payment') dr = v.amount;
                 if(v.type === 'Purchase' || v.type === 'Receipt') cr = v.amount;
@@ -504,7 +528,6 @@
         document.getElementById('dPurch').innerText = `₹${purch.toFixed(2)}`;
     };
 
-    // Startup
     window.onload = async function() { await fetchCoreData(); calculateDashboard(); };
 </script>
 </body>
