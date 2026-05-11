@@ -145,6 +145,42 @@
 
         // Automatically fetch data when page loads
         window.onload = loadData;
+    function generateGSTR3BPayload(salesTotalTaxable, outCGST, outSGST, outIGST, itcCGST, itcSGST, itcIGST) {
+    
+    // Construct the JSON exactly as the API expects it
+    const gstr3bPayload = {
+        "gstin": "YOUR_ACTUAL_GSTIN", // Pull this from user settings
+        "ret_period": "062026",       // E.g., June 2026
+        
+        "sup_details": {
+            // Section 3.1: Output Tax
+            "osup_det": {
+                "txval": parseFloat(salesTotalTaxable.toFixed(2)),
+                "iamt": parseFloat(outIGST.toFixed(2)),
+                "camt": parseFloat(outCGST.toFixed(2)),
+                "samt": parseFloat(outSGST.toFixed(2)),
+                "csamt": 0.00
+            }
+        },
+        
+        "itc_elg": {
+            // Section 4: Eligible Input Tax Credit
+            "itc_avl": [
+                {
+                    "ty": "ALL_OTHER_ITC",
+                    "iamt": parseFloat(itcIGST.toFixed(2)),
+                    "camt": parseFloat(itcCGST.toFixed(2)),
+                    "samt": parseFloat(itcSGST.toFixed(2)),
+                    "csamt": 0.00
+                }
+            ]
+        }
+    };
+
+    return JSON.stringify(gstr3bPayload, null, 2);
+}
     </script>
+
+    
 </body>
 </html>
