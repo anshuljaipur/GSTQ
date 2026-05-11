@@ -29,6 +29,8 @@
         .btn-refresh:hover { background-color: #e67e22; }
         .btn-json { background-color: #8e44ad; color: white; }
         .btn-json:hover { background-color: #732d91; }
+        .btn-download { background-color: #27ae60; color: white; margin-top: 15px; display: none; }
+        .btn-download:hover { background-color: #2ecc71; }
         
         .details { font-size: 14px; color: #555; line-height: 1.6; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px;}
         
@@ -79,13 +81,14 @@
     <div class="json-box" id="jsonBox">
         <h3>Government API Payload (GSTR-3B)</h3>
         <pre id="jsonOutput"></pre>
+        <!-- NEW DOWNLOAD BUTTON -->
+        <button id="downloadBtn" class="btn-download" onclick="downloadFile()">💾 Download .json File</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your exact Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
             authDomain: "glacierpos-35f4c.firebaseapp.com",
@@ -98,7 +101,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // We store the data globally so the JSON button can use it without re-fetching
         window.gstData = {
             salesTaxableVal: 0, outCGST: 0, outSGST: 0, outIGST: 0,
             itcCGST: 0, itcSGST: 0, itcIGST: 0
@@ -108,11 +110,9 @@
             const btn = document.querySelector('.btn-refresh');
             btn.innerText = "⏳ Calculating...";
             
-            // Reset totals before calculation
             window.gstData = { salesTaxableVal: 0, outCGST: 0, outSGST: 0, outIGST: 0, itcCGST: 0, itcSGST: 0, itcIGST: 0 };
 
             try {
-                // 1. Fetch Sales (Output Tax)
                 const salesSnapshot = await getDocs(collection(db, "invoices"));
                 salesSnapshot.forEach((doc) => {
                     const data = doc.data();
@@ -123,7 +123,6 @@
                 });
                 const totalOutput = window.gstData.outCGST + window.gstData.outSGST + window.gstData.outIGST;
 
-                // 2. Fetch Purchases (Input Tax Credit)
                 const purchasesSnapshot = await getDocs(collection(db, "purchases"));
                 purchasesSnapshot.forEach((doc) => {
                     const data = doc.data();
@@ -135,13 +134,11 @@
                 });
                 const totalITC = window.gstData.itcCGST + window.gstData.itcSGST + window.gstData.itcIGST;
 
-                // 3. Calculate Net Payable
                 const netCGST = Math.max(0, window.gstData.outCGST - window.gstData.itcCGST);
                 const netSGST = Math.max(0, window.gstData.outSGST - window.gstData.itcSGST);
                 const netIGST = Math.max(0, window.gstData.outIGST - window.gstData.itcIGST);
                 const totalNet = netCGST + netSGST + netIGST;
 
-                // 4. Update the Screen
                 document.getElementById('outTotal').innerText = `₹${totalOutput.toFixed(2)}`;
                 document.getElementById('outDetails').innerHTML = `Taxable Sales: ₹${window.gstData.salesTaxableVal.toFixed(2)}<hr style="border:0; border-top:1px dashed #ccc; margin:5px 0;">CGST: ₹${window.gstData.outCGST.toFixed(2)} <br> SGST: ₹${window.gstData.outSGST.toFixed(2)} <br> IGST: ₹${window.gstData.outIGST.toFixed(2)}`;
 
@@ -157,8 +154,8 @@
                 }
 
                 btn.innerText = "🔄 Fetch Latest Data";
-                // Hide JSON box if it was open from a previous generation
                 document.getElementById('jsonBox').style.display = "none";
+                document.getElementById('downloadBtn').style.display = "none";
 
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -167,18 +164,15 @@
             }
         };
 
-        // --- NEW JSON GENERATOR FEATURE ---
         window.generateJSON = function() {
-            // Check if data is loaded first
             if (window.gstData.salesTaxableVal === 0 && window.gstData.itcCGST === 0) {
-                alert("Please click 'Fetch Latest Data' first so the system can calculate your totals.");
+                alert("Please click 'Fetch Latest Data' first.");
                 return;
             }
 
-            // Construct the exact GSTR-3B Payload
             const gstr3bPayload = {
-                "gstin": "08AAAAA0000A1Z5", // Replace with your actual GSTIN
-                "ret_period": "062026",       // Target filing quarter
+                "gstin": "08AAAAA0000A1Z5", 
+                "ret_period": "062026",       
                 
                 "sup_details": {
                     "osup_det": {
@@ -203,16 +197,41 @@
                 }
             };
 
-            // Display the payload on screen
             const jsonString = JSON.stringify(gstr3bPayload, null, 4);
             document.getElementById('jsonOutput').innerText = jsonString;
             document.getElementById('jsonBox').style.display = "block";
             
-            // Scroll down to show the user the new box
+            // Show the download button
+            document.getElementById('downloadBtn').style.display = "inline-block";
+            
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         };
 
-        // Automatically fetch data when page loads
+        // --- NEW DOWNLOAD FUNCTION ---
+        window.downloadFile = function() {
+            // 1. Grab the text from the screen
+            const textToSave = document.getElementById('jsonOutput').innerText;
+            
+            // 2. Turn it into a "Blob" (a fake file in the browser's memory)
+            const blob = new Blob([textToSave], { type: "application/json" });
+            
+            // 3. Create a temporary, invisible link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Name the file dynamically based on the date
+            a.download = `GlacierPOS_GSTR3B_${new Date().toISOString().split('T')[0]}.json`;
+            
+            // 4. Click the invisible link to force the browser download
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up the invisible link
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
         window.onload = loadData;
     </script>
 </body>
