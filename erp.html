@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Glacier Ultimate ERP</title>
     <style>
-        :root { --nav-bg: #2c3e50; --active: #3498db; --bg: #ecf0f1; --card: #ffffff; --text: #333; --border: #bdc3c7; --green: #27ae60; --red: #c0392b; --orange: #f39c12; }
+        :root { --nav-bg: #2c3e50; --active: #3498db; --bg: #ecf0f1; --card: #ffffff; --text: #333; --border: #bdc3c7; --green: #27ae60; --red: #c0392b; --orange: #e67e22; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         /* TOP NAVIGATION BAR */
@@ -70,6 +70,9 @@
         .totals-row { display: flex; justify-content: space-between; font-size: 18px; margin-bottom: 10px; color: #555; }
         .grand-total { display: flex; justify-content: space-between; font-size: 32px; font-weight: bold; color: var(--green); margin-bottom: 20px; }
         .btn-checkout { background: var(--green); color: white; font-size: 20px; padding: 15px; border-radius: 8px; height: 100%; }
+        
+        /* Due Amount Badge */
+        .due-badge { font-size: 13px; font-weight: bold; padding: 2px 8px; border-radius: 12px; display: inline-block; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -160,7 +163,14 @@
                             <div class="grand-total"><span>Net Payable:</span><span id="posGrandTotal">₹0.00</span></div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div>
-                                    <input type="text" id="posCustomer" placeholder="Customer Name (Optional)" style="margin-bottom:10px;">
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                                        <label style="margin:0;">Select Customer</label>
+                                        <span id="posPartyBal" class="due-badge"></span>
+                                    </div>
+                                    <!-- Changed to a dropdown for exact ledger matching -->
+                                    <select id="posCustomer" onchange="displayPartyBalance('posCustomer', 'posPartyBal')" style="margin-bottom:10px; height: 40px; font-size: 14px;"></select>
+                                    
+                                    <label style="margin-bottom:5px;">Payment Mode</label>
                                     <select id="posMode" style="height: 40px;"><option value="Cash">Cash (Galla)</option><option value="Bank">Bank/UPI</option><option value="Credit">Credit (Udhaar)</option></select>
                                 </div>
                                 <button class="btn btn-checkout" onclick="checkoutBill()">💳 Complete Sale</button>
@@ -176,7 +186,10 @@
                 <input type="hidden" id="invType">
                 <div class="grid-3" style="background: var(--bg); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
                     <div class="form-group"><label>Date</label><input type="date" id="invDate"></div>
-                    <div class="form-group"><label>Select Party</label><select id="invParty"></select></div>
+                    <div class="form-group">
+                        <label>Select Party <span id="invPartyBal" class="due-badge" style="float:right;"></span></label>
+                        <select id="invParty" onchange="displayPartyBalance('invParty', 'invPartyBal')"></select>
+                    </div>
                     <div class="form-group"><label>Payment Mode</label><select id="invMode"><option value="Cash">Cash</option><option value="Bank">Bank/UPI</option><option value="Credit">Credit</option></select></div>
                 </div>
                 <div class="grid-4" style="align-items: end;">
@@ -201,7 +214,11 @@
                 <input type="hidden" id="vouchType">
                 <div style="max-width: 600px; margin: 0 auto;">
                     <div class="form-group"><label>Date</label><input type="date" id="vouchDate"></div>
-                    <div class="form-group" id="vouchPartyWrap"><label id="vouchPartyLbl">Select Ledger</label><select id="vouchParty"></select></div>
+                    <div class="form-group" id="vouchPartyWrap">
+                        <label id="vouchPartyLbl" style="display:inline-block;">Select Ledger</label>
+                        <span id="vouchPartyBal" class="due-badge" style="float:right;"></span>
+                        <select id="vouchParty" onchange="displayPartyBalance('vouchParty', 'vouchPartyBal')"></select>
+                    </div>
                     <div class="form-group" id="vouchModeWrap"><label>Transaction Mode</label><select id="vouchMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select></div>
                     <div class="form-group"><label>Amount (₹)</label><input type="number" id="vouchAmt"></div>
                     <div class="form-group"><label>Remarks</label><input type="text" id="vouchRem"></div>
@@ -298,6 +315,42 @@
         snap.forEach(doc => window.allVouchers.push({ id: doc.id, ...doc.data() }));
     };
 
+    // --- LIVE BALANCE CALCULATION ENGINE ---
+    window.calculatePartyBalance = function(partyName) {
+        if(!partyName || partyName === 'Cash_Counter' || partyName === 'Walk_In') return "";
+        let bal = 0;
+        window.allVouchers.filter(v => v.party === partyName || v.mode === partyName || (v.type==='Contra' && v.mode.includes(partyName))).forEach(v => {
+            const amt = parseFloat(v.amount || v.totalAmount || 0);
+            let dr = 0, cr = 0;
+            if(v.type === 'Sale' || v.type === 'Payment' || (v.mode === 'CashToBank' && partyName === 'Bank')) dr = amt;
+            if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && partyName === 'Cash')) cr = amt;
+            bal += (dr - cr);
+        });
+        
+        if(bal === 0) return "Settled (₹0.00)";
+        return `₹${Math.abs(bal).toFixed(2)} ${bal > 0 ? '(Dr) Due to Receive' : '(Cr) Due to Pay'}`;
+    };
+
+    window.displayPartyBalance = function(selectId, displayId) {
+        const party = document.getElementById(selectId).value;
+        const display = document.getElementById(displayId);
+        if(!display) return;
+        
+        if(!party || party === 'Cash_Counter' || party === 'Walk_In') {
+            display.innerText = '';
+            display.style.background = 'transparent';
+            return;
+        }
+        
+        const balText = calculatePartyBalance(party);
+        display.innerText = balText;
+        
+        // Color coding the Due Badge
+        if(balText.includes('Settled')) { display.style.background = '#ecf0f1'; display.style.color = '#7f8c8d'; }
+        else if(balText.includes('(Dr)')) { display.style.background = '#fdebd0'; display.style.color = 'var(--orange)'; }
+        else if(balText.includes('(Cr)')) { display.style.background = '#fadbd8'; display.style.color = 'var(--red)'; }
+    };
+
     // --- MASTERS ---
     window.saveParty = async function() {
         await addDoc(collection(db, "masters_party"), { type: document.getElementById('mPartyType').value, name: document.getElementById('mPartyName').value });
@@ -319,6 +372,13 @@
     // --- POS ENGINE ---
     window.openPOS = function() {
         openView('pos');
+        
+        // Populate POS Customer Dropdown
+        const cSel = document.getElementById('posCustomer');
+        cSel.innerHTML = '<option value="Walk_In">Walk-in / Cash Customer</option>';
+        window.masterParties.filter(p => p.type === 'Customer').forEach(p => cSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+        displayPartyBalance('posCustomer', 'posPartyBal'); // clear badge
+        
         renderItemGrid("");
         document.getElementById('posSearch').focus();
     };
@@ -354,7 +414,12 @@
     window.updateCart = function(i, f, v) { window.cart[i][f] = v; renderCart(); };
     window.toggleDiscType = function(i) { window.cart[i].discType = window.cart[i].discType === '₹' ? '%' : '₹'; window.cart[i].discValue = 0; renderCart(); };
     window.removeFromCart = function(i) { window.cart.splice(i, 1); renderCart(); };
-    window.clearCart = function() { window.cart = []; document.getElementById('posCustomer').value = ''; renderCart(); };
+    window.clearCart = function() { 
+        window.cart = []; 
+        document.getElementById('posCustomer').value = 'Walk_In'; 
+        displayPartyBalance('posCustomer', 'posPartyBal');
+        renderCart(); 
+    };
 
     window.renderCart = function() {
         const tbody = document.getElementById('cartBody'); tbody.innerHTML = '';
@@ -382,12 +447,13 @@
         if(window.cart.length === 0) return alert("Cart empty");
         const payload = {
             date: new Date().toISOString(), module: 'Invoice', type: 'Sale',
-            party: document.getElementById('posCustomer').value || "Cash Customer",
+            party: document.getElementById('posCustomer').value || "Walk_In",
             mode: document.getElementById('posMode').value,
             items: window.cart, amount: parseFloat(document.getElementById('posGrandTotal').innerText.replace('₹',''))
         };
         await addDoc(collection(db, "vouchers_erp"), payload);
         alert("Sale Complete!"); clearCart(); await fetchCoreData();
+        displayPartyBalance('posCustomer', 'posPartyBal'); // Refresh balance immediately
     };
 
     // --- PURCHASE / RETURN ENGINE ---
@@ -395,8 +461,11 @@
         openView('invoice');
         document.getElementById('invTitle').innerText = title; document.getElementById('invType').value = type;
         window.currentInvoiceItems = []; window.renderInvoiceTable();
-        const pSelect = document.getElementById('invParty'); pSelect.innerHTML = '<option value="Cash_Counter">Cash</option>';
+        
+        const pSelect = document.getElementById('invParty'); 
+        pSelect.innerHTML = '<option value="">-- Select Party --</option>';
         window.masterParties.filter(p => p.type === (type.includes('Sale')?'Customer':'Supplier')).forEach(p => pSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+        displayPartyBalance('invParty', 'invPartyBal'); // clear badge
     };
 
     window.autoFillRate = function() {
@@ -436,8 +505,11 @@
         openView('voucher'); document.getElementById('vouchTitle').innerText = title; document.getElementById('vouchType').value = type;
         const pSel = document.getElementById('vouchParty'); pSel.innerHTML = '<option value="">-- Select Ledger --</option>';
         document.getElementById('vouchPartyWrap').style.display = type === 'Contra' ? 'none' : 'block';
+        
         if(type === 'Contra') document.getElementById('vouchModeWrap').innerHTML = `<label>Action</label><select id="vouchMode"><option value="CashToBank">Deposit Cash to Bank</option><option value="BankToCash">Withdraw from Bank</option></select>`;
         else window.masterParties.forEach(p => pSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
+        
+        displayPartyBalance('vouchParty', 'vouchPartyBal'); // clear badge
     };
 
     window.saveVoucher = async function() {
@@ -449,7 +521,7 @@
             mode: type === 'Contra' ? document.getElementById('vouchMode').value : (type === 'Journal' ? 'Adjustment' : document.getElementById('vouchMode').value),
             amount: amt, remarks: document.getElementById('vouchRem').value
         });
-        alert("Voucher Saved!"); await fetchCoreData(); document.getElementById('vouchAmt').value = "";
+        alert("Voucher Saved!"); await fetchCoreData(); openVoucher(type, document.getElementById('vouchTitle').innerText);
     };
 
     // --- REPORTS & DASHBOARD ---
@@ -464,14 +536,11 @@
 
     window.runReportLogic = function() {
         const type = window.currentReport; const c = document.getElementById('reportContainer'); let html = "<table><thead><tr>";
-        
         if(type === 'PNL') {
             let sales = 0, cogs = 0, exp = 0;
             window.allVouchers.forEach(v => {
-                const amt = parseFloat(v.amount || v.totalAmount || 0); // FIX
-                
-                if(v.type === 'Sale') sales += amt; 
-                if(v.type === 'Return_Sale') sales -= amt;
+                const amt = parseFloat(v.amount || v.totalAmount || 0);
+                if(v.type === 'Sale') sales += amt; if(v.type === 'Return_Sale') sales -= amt;
                 if(v.type === 'Purchase') cogs += amt;
                 if(v.type === 'Payment' && window.masterParties.find(p => p.name === v.party)?.type === 'Expense') exp += amt;
             });
@@ -482,8 +551,7 @@
             html += "<th>Date</th><th>Type</th><th>Ref</th><th>In (+)</th><th>Out (-)</th></tr></thead><tbody>";
             let tIn = 0, tOut = 0;
             window.allVouchers.forEach(v => {
-                const amt = parseFloat(v.amount || v.totalAmount || 0); // FIX
-
+                const amt = parseFloat(v.amount || v.totalAmount || 0);
                 if(v.mode === 'Cash' || v.mode === 'Bank' || v.type === 'Contra') {
                     if(v.type === 'Sale' || v.type === 'Receipt') { tIn += amt; html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${v.party||v.remarks}</td><td>${amt}</td><td></td></tr>`; }
                     if(v.type === 'Purchase' || v.type === 'Payment') { tOut += amt; html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${v.party||v.remarks}</td><td></td><td>${amt}</td></tr>`; }
@@ -508,13 +576,12 @@
             html += "<th>Date</th><th>Type</th><th>Dr</th><th>Cr</th><th>Bal</th></tr></thead><tbody>";
             let bal = 0;
             window.allVouchers.filter(v => v.party === p || v.mode === p || (v.type==='Contra' && v.mode.includes(p))).forEach(v => {
-                const amt = parseFloat(v.amount || v.totalAmount || 0); // FIX
+                const amt = parseFloat(v.amount || v.totalAmount || 0);
                 let dr = 0, cr = 0;
-                
                 if(v.type === 'Sale' || v.type === 'Payment' || (v.mode === 'CashToBank' && p === 'Bank')) dr = amt;
                 if(v.type === 'Purchase' || v.type === 'Receipt' || (v.mode === 'CashToBank' && p === 'Cash')) cr = amt;
                 bal += (dr - cr);
-                html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${dr||''}</td><td>${cr||''}</td><td>${Math.abs(bal)} ${bal>0?'Dr':'Cr'}</td></tr>`;
+                html += `<tr><td>${v.date}</td><td>${v.type}</td><td>${dr||''}</td><td>${cr||''}</td><td>${Math.abs(bal).toFixed(2)} ${bal>0?'Dr':'Cr'}</td></tr>`;
             });
             html += `</tbody></table>`;
         }
@@ -524,41 +591,18 @@
     window.calculateDashboard = async function() {
         if(window.allVouchers.length === 0) await fetchCoreData();
         let cash = 0, bank = 0, dr = 0, cr = 0, sales = 0, purch = 0;
-        
         window.allVouchers.forEach(v => {
-            // FIX: Safely grab the amount from either old bills or new bills!
             const amt = parseFloat(v.amount || v.totalAmount || 0);
-
-            if(v.type === 'Sale') sales += amt; 
-            if(v.type === 'Purchase') purch += amt;
-            
-            if(v.mode === 'Credit') { 
-                if(v.type === 'Sale') dr += amt; 
-                if(v.type === 'Purchase') cr += amt; 
-            }
-            if(v.type === 'Receipt') dr -= amt; 
-            if(v.type === 'Payment') cr -= amt;
-
-            if(v.mode === 'Cash') { 
-                if(v.type === 'Sale' || v.type === 'Receipt') cash += amt; 
-                if(v.type === 'Purchase' || v.type === 'Payment') cash -= amt; 
-            }
-            if(v.mode === 'Bank') { 
-                if(v.type === 'Sale' || v.type === 'Receipt') bank += amt; 
-                if(v.type === 'Purchase' || v.type === 'Payment') bank -= amt; 
-            }
-            if(v.type === 'Contra') { 
-                if(v.mode === 'CashToBank') { cash -= amt; bank += amt; } 
-                if(v.mode === 'BankToCash') { bank -= amt; cash += amt; } 
-            }
+            if(v.type === 'Sale') sales += amt; if(v.type === 'Purchase') purch += amt;
+            if(v.mode === 'Credit') { if(v.type === 'Sale') dr += amt; if(v.type === 'Purchase') cr += amt; }
+            if(v.type === 'Receipt') dr -= amt; if(v.type === 'Payment') cr -= amt;
+            if(v.mode === 'Cash') { if(v.type === 'Sale' || v.type === 'Receipt') cash += amt; if(v.type === 'Purchase' || v.type === 'Payment') cash -= amt; }
+            if(v.mode === 'Bank') { if(v.type === 'Sale' || v.type === 'Receipt') bank += amt; if(v.type === 'Purchase' || v.type === 'Payment') bank -= amt; }
+            if(v.type === 'Contra') { if(v.mode === 'CashToBank') { cash -= amt; bank += amt; } if(v.mode === 'BankToCash') { bank -= amt; cash += amt; } }
         });
-
-        document.getElementById('dCash').innerText = `₹${cash.toFixed(2)}`; 
-        document.getElementById('dBank').innerText = `₹${bank.toFixed(2)}`;
-        document.getElementById('dDebt').innerText = `₹${Math.max(0, dr).toFixed(2)}`; 
-        document.getElementById('dCred').innerText = `₹${Math.max(0, cr).toFixed(2)}`;
-        document.getElementById('dSales').innerText = `₹${sales.toFixed(2)}`; 
-        document.getElementById('dPurch').innerText = `₹${purch.toFixed(2)}`;
+        document.getElementById('dCash').innerText = `₹${cash.toFixed(2)}`; document.getElementById('dBank').innerText = `₹${bank.toFixed(2)}`;
+        document.getElementById('dDebt').innerText = `₹${Math.max(0, dr).toFixed(2)}`; document.getElementById('dCred').innerText = `₹${Math.max(0, cr).toFixed(2)}`;
+        document.getElementById('dSales').innerText = `₹${sales.toFixed(2)}`; document.getElementById('dPurch').innerText = `₹${purch.toFixed(2)}`;
     };
 
     window.onload = async function() { await fetchCoreData(); calculateDashboard(); };
