@@ -16,118 +16,34 @@
             --border-color: #808080;
         }
 
-        body { 
-            font-family: Arial, Helvetica, sans-serif; 
-            background: #e0e0e0; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            height: 100vh; 
-            box-sizing: border-box;
-            justify-content: center;
-        }
+        body { font-family: Arial, Helvetica, sans-serif; background: #e0e0e0; margin: 0; padding: 20px; display: flex; height: 100vh; box-sizing: border-box; justify-content: center; }
+        .app-container { display: flex; width: 100%; max-width: 1400px; height: 100%; background: var(--white); border: 2px solid var(--border-color); box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
 
-        /* MAIN APP CONTAINER */
-        .app-container {
-            display: flex;
-            width: 100%;
-            max-width: 1400px;
-            height: 100%;
-            background: var(--white);
-            border: 2px solid var(--border-color);
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-        }
+        /* LEFT PANE: MENUS */
+        .gateway-pane { width: 350px; background: var(--tally-bg); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; position: relative; }
+        .gateway-header { background: var(--tally-header); color: var(--white); text-align: center; padding: 8px; font-weight: bold; font-size: 18px; border-bottom: 1px solid var(--border-color); }
+        .breadcrumb { font-style: italic; font-size: 12px; text-align: center; margin-bottom: 2px; margin-top: 10px; color: #555;}
 
-        /* LEFT PANE: GATEWAY OF TALLY */
-        .gateway-pane {
-            width: 350px;
-            background: var(--tally-bg);
-            border-right: 2px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .gateway-header {
-            background: var(--tally-header);
-            color: var(--white);
-            text-align: center;
-            padding: 8px;
-            font-weight: bold;
-            font-size: 18px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .menu-list {
-            padding: 20px 0;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .menu-group {
-            color: var(--tally-text);
-            font-weight: bold;
-            font-size: 16px;
-            text-align: center;
-            margin: 15px 0 5px 0;
-        }
-
-        .menu-item {
-            color: var(--tally-text);
-            font-size: 15px;
-            padding: 4px 40px;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-        }
-
-        .menu-item:hover, .menu-item.active {
-            background: var(--tally-select);
-            color: #000;
-        }
-
-        .hotkey {
-            color: var(--tally-hotkey);
-            font-weight: bold;
-        }
+        .menu-list { padding: 10px 0; flex: 1; overflow-y: auto; display: none; }
+        .menu-list.active { display: block; } /* Controls which menu is visible */
+        
+        .menu-group { color: var(--tally-text); font-weight: bold; font-size: 16px; text-align: center; margin: 12px 0 4px 0; }
+        .menu-item { color: var(--tally-text); font-size: 15px; padding: 3px 40px; cursor: pointer; text-decoration: none; display: block; }
+        .menu-item:hover, .menu-item.active-item { background: var(--tally-select); color: #000; }
+        .hotkey { color: var(--tally-hotkey); font-weight: bold; }
 
         /* RIGHT PANE: ACTION AREA */
-        .content-pane {
-            flex: 1;
-            background: #f0f0f0;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+        .content-pane { flex: 1; background: #f0f0f0; display: flex; flex-direction: column; position: relative; }
+        .content-header { background: var(--tally-header); color: var(--white); padding: 8px 15px; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; }
+        .view-section { display: none; padding: 20px; flex: 1; overflow-y: auto; background: var(--white); }
+        .view-section.active { display: block; }
 
-        .content-header {
-            background: var(--tally-header);
-            color: var(--white);
-            padding: 8px 15px;
-            font-weight: bold;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .view-section {
-            display: none;
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-            background: var(--white);
-        }
-
-        .view-section.active {
-            display: block;
-        }
-
-        /* MODERNIZED FORMS INSIDE TALLY SHELL */
+        /* FORMS & TABLES */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: var(--tally-text); }
         input, select { width: 100%; padding: 8px; border: 1px solid var(--border-color); box-sizing: border-box; font-size: 14px; }
-        
         .btn { padding: 8px 15px; border: 1px solid var(--border-color); cursor: pointer; font-weight: bold; background: #e0e0e0; color: #000; transition: 0.1s;}
         .btn:hover { background: var(--tally-select); }
         .btn-green { background: #4CAF50; color: white; border-color: #2E8B57; }
@@ -135,12 +51,10 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         th, td { border: 1px solid var(--border-color); padding: 8px; text-align: left; }
         th { background: var(--tally-select); color: var(--tally-text); }
-
-        /* Dasboard Cards */
+        
         .dash-card { border: 1px solid var(--border-color); padding: 15px; text-align: center; background: var(--tally-bg); }
         .dash-card h3 { margin: 0 0 10px 0; color: var(--tally-text); font-size: 14px; }
         .dash-card .amt { font-size: 22px; font-weight: bold; color: #000; }
-        
         .esc-hint { font-size: 12px; color: #ccc; }
     </style>
 </head>
@@ -149,28 +63,110 @@
     <div class="app-container">
         
         <div class="gateway-pane">
-            <div class="gateway-header">Gateway of Tally</div>
             
-            <div class="menu-list">
+            <div id="nav-main" class="menu-list active" style="padding-top: 0;">
+                <div class="gateway-header">Gateway of Tally</div>
+                
                 <div class="menu-group">Masters</div>
-                <div class="menu-item" onclick="openView('masters-party')"><span class="hotkey">A</span>ccounts Info.</div>
-                <div class="menu-item" onclick="openView('masters-item')"><span class="hotkey">I</span>nventory Info.</div>
+                <div class="menu-item" onclick="switchMenu('acc-info')"><span class="hotkey">A</span>ccounts Info.</div>
+                <div class="menu-item" onclick="switchMenu('inv-info')"><span class="hotkey">I</span>nventory Info.</div>
                 
                 <div class="menu-group">Transactions</div>
                 <div class="menu-item" onclick="openVoucher('Payment', 'Accounting Vouchers')">Accounting <span class="hotkey">V</span>ouchers</div>
-                <div class="menu-item" onclick="openPOS()">Inven<span class="hotkey">T</span>ory Vouchers (POS)</div>
+                <div class="menu-item" onclick="openPOS()">Inven<span class="hotkey">T</span>ory Vouchers</div>
                 
+                <div class="menu-group">Import</div>
+                <div class="menu-item" onclick="switchMenu('import')">Imp<span class="hotkey">O</span>rt of Data</div>
+
                 <div class="menu-group">Reports</div>
                 <div class="menu-item" onclick="openReport('BS', 'Balance Sheet')"><span class="hotkey">B</span>alance Sheet</div>
                 <div class="menu-item" onclick="openReport('PNL', 'Profit & Loss A/c')"><span class="hotkey">P</span>rofit & Loss A/c</div>
                 <div class="menu-item" onclick="openReport('ItemsFlow', 'Stock Summary')"><span class="hotkey">S</span>tock Summary</div>
+                <div class="menu-item" onclick="alert('Ratio Analysis module pending')"><span class="hotkey">R</span>atio Analysis</div>
                 
-                <div class="menu-group" style="margin-top: 5px;"></div>
-                <div class="menu-item" onclick="openView('dashboard')"><span class="hotkey">D</span>isplay Dashboard</div>
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="switchMenu('display')"><span class="hotkey">D</span>isplay</div>
+                <div class="menu-item" onclick="switchMenu('multi-print')"><span class="hotkey">M</span>ulti Account Printing</div>
                 
-                <div class="menu-group" style="margin-top: 15px;"></div>
+                <div style="margin-top: 15px;"></div>
                 <div class="menu-item" onclick="alert('Use browser close to quit.')"><span class="hotkey">Q</span>uit</div>
             </div>
+
+            <div id="nav-acc-info" class="menu-list" style="padding-top: 0;">
+                <div class="breadcrumb">Gateway of Tally ....</div>
+                <div class="gateway-header">Accounts Info.</div>
+                <div style="margin-top: 20px;"></div>
+                <div class="menu-item" onclick="alert('Groups module pending')"><span class="hotkey">G</span>roups</div>
+                <div class="menu-item" onclick="openView('masters-party', 'Ledger Creation')"><span class="hotkey">L</span>edgers</div>
+                <div class="menu-item" onclick="alert('Statutory Info pending')">S<span class="hotkey">T</span>atutory Info</div>
+                <div class="menu-item" onclick="alert('Voucher Types pending')"><span class="hotkey">V</span>oucher Types</div>
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="switchMenu('main')"><span class="hotkey">Q</span>uit</div>
+            </div>
+
+            <div id="nav-inv-info" class="menu-list" style="padding-top: 0;">
+                <div class="breadcrumb">Gateway of Tally ....</div>
+                <div class="gateway-header">Inventory Info.</div>
+                <div style="margin-top: 20px;"></div>
+                <div class="menu-item" onclick="alert('Stock Groups module pending')">Stock <span class="hotkey">G</span>roups</div>
+                <div class="menu-item" onclick="openView('masters-item', 'Stock Item Creation')">Stock <span class="hotkey">I</span>tems</div>
+                <div class="menu-item" onclick="alert('Units of Measure pending')"><span class="hotkey">U</span>nits of Measure</div>
+                <div class="menu-item" onclick="alert('Voucher Types pending')"><span class="hotkey">V</span>oucher Types</div>
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="switchMenu('main')"><span class="hotkey">Q</span>uit</div>
+            </div>
+
+            <div id="nav-display" class="menu-list" style="padding-top: 0;">
+                <div class="breadcrumb">Gateway of Tally ....</div>
+                <div class="gateway-header">Display Menu</div>
+                
+                <div style="margin-top: 20px;"></div>
+                <div class="menu-item" onclick="openReport('TB', 'Trial Balance')"><span class="hotkey">T</span>rial Balance</div>
+                <div class="menu-item" onclick="openReport('DayBook', 'Day Book')"><span class="hotkey">D</span>ay Book</div>
+                
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="alert('Account Books Module Pending')"><span class="hotkey">A</span>ccount Books</div>
+                <div class="menu-item" onclick="alert('Statements Module Pending')"><span class="hotkey">S</span>tatements of Accounts</div>
+                
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="alert('Inventory Books Pending')"><span class="hotkey">I</span>nventory Books</div>
+                <div class="menu-item" onclick="alert('Statements Pending')">Stat<span class="hotkey">E</span>ments of Inventory</div>
+                
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="alert('Statutory Reports Pending')">Statut<span class="hotkey">O</span>ry Reports</div>
+                <div class="menu-item" onclick="openReport('CashFlow', 'Cash/Funds Flow')"><span class="hotkey">C</span>ash/Funds Flow</div>
+                
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="alert('List of Accounts Pending')"><span class="hotkey">L</span>ist of Accounts</div>
+                <div class="menu-item" onclick="alert('Exception Reports Pending')">E<span class="hotkey">X</span>ception Reports</div>
+                
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="switchMenu('main')"><span class="hotkey">Q</span>uit</div>
+            </div>
+
+            <div id="nav-import" class="menu-list" style="padding-top: 0;">
+                <div class="breadcrumb">Gateway of Tally ....</div>
+                <div class="gateway-header">Import of Data</div>
+                <div style="margin-top: 20px;"></div>
+                <div class="menu-item" onclick="alert('Import Masters pending')"><span class="hotkey">M</span>asters</div>
+                <div class="menu-item" onclick="alert('Import Vouchers pending')"><span class="hotkey">V</span>ouchers</div>
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="switchMenu('main')"><span class="hotkey">Q</span>uit</div>
+            </div>
+
+            <div id="nav-multi-print" class="menu-list" style="padding-top: 0;">
+                <div class="breadcrumb">Gateway of Tally ....</div>
+                <div class="gateway-header">Multi Account Printing</div>
+                <div style="margin-top: 20px;"></div>
+                <div class="menu-item" onclick="alert('Print Account Books pending')"><span class="hotkey">A</span>ccount Books</div>
+                <div class="menu-item" onclick="alert('Print Outstanding pending')"><span class="hotkey">O</span>utstanding Statements</div>
+                <div class="menu-item" onclick="alert('Print Inventory pending')"><span class="hotkey">I</span>nventory Books</div>
+                <div class="menu-item" onclick="alert('Print Day Book pending')"><span class="hotkey">D</span>ay Book</div>
+                <div class="menu-item" onclick="alert('Print Vouchers pending')"><span class="hotkey">M</span>ulti Voucher Printing</div>
+                <div style="margin-top: 15px;"></div>
+                <div class="menu-item" onclick="switchMenu('main')"><span class="hotkey">Q</span>uit</div>
+            </div>
+
         </div>
 
         <div class="content-pane">
@@ -180,40 +176,22 @@
             </div>
 
             <div id="view-dashboard" class="view-section active">
-                <div class="grid-3">
-                    <div class="dash-card"><h3>Cash in Hand</h3><div class="amt" id="dCash">₹0.00</div></div>
-                    <div class="dash-card"><h3>Bank Balance</h3><div class="amt" id="dBank">₹0.00</div></div>
-                    <div class="dash-card"><h3>Total Sales</h3><div class="amt" id="dSales">₹0.00</div></div>
-                </div>
-                <div class="grid-2" style="margin-top: 15px;">
-                    <div class="dash-card"><h3>Sundry Debtors</h3><div class="amt" id="dDebt">₹0.00</div></div>
-                    <div class="dash-card"><h3>Sundry Creditors</h3><div class="amt" id="dCred">₹0.00</div></div>
+                <div style="text-align: center; color: #ccc; margin-top: 20vh; font-size: 24px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Tally.ERP_9_logo.png/640px-Tally.ERP_9_logo.png" style="opacity: 0.1; width: 300px;"><br>
+                    Glacier ERP Edition
                 </div>
             </div>
 
             <div id="view-pos" class="view-section">
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label>Item Search (Barcode/Name)</label>
-                        <input type="text" id="posSearch" placeholder="Type and press Enter" autocomplete="off">
-                    </div>
-                    <div style="width: 250px;">
-                        <label>Party A/c Name</label>
-                        <select id="posCustomer"></select>
-                    </div>
+                    <div style="flex: 1;"><label>Item Search (Barcode/Name)</label><input type="text" id="posSearch" placeholder="Type and press Enter" autocomplete="off"></div>
+                    <div style="width: 250px;"><label>Party A/c Name</label><select id="posCustomer"></select></div>
                 </div>
-
                 <div style="height: 250px; overflow-y: auto; border: 1px solid var(--border-color);">
-                    <table>
-                        <thead><tr><th>Name of Item</th><th>Quantity</th><th>Rate</th><th>Amount</th><th>Act</th></tr></thead>
-                        <tbody id="cartBody"></tbody>
-                    </table>
+                    <table><thead><tr><th>Name of Item</th><th>Quantity</th><th>Rate</th><th>Amount</th><th>Act</th></tr></thead><tbody id="cartBody"></tbody></table>
                 </div>
-
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: var(--tally-bg); padding: 15px; border: 1px solid var(--border-color);">
-                    <div style="font-size: 24px; font-weight: bold; color: var(--tally-text);">
-                        Total: <span id="posGrandTotal">₹0.00</span>
-                    </div>
+                    <div style="font-size: 24px; font-weight: bold; color: var(--tally-text);">Total: <span id="posGrandTotal">₹0.00</span></div>
                     <button class="btn btn-green" style="font-size: 16px;" onclick="checkoutBill()">Save Invoice (Enter)</button>
                 </div>
             </div>
@@ -233,14 +211,7 @@
                 <h3 style="color: var(--tally-text); border-bottom: 1px solid #ccc;">Ledger Creation</h3>
                 <div class="form-group"><label>Name</label><input type="text" id="mPartyName"></div>
                 <div class="form-group"><label>Under (Group)</label>
-                    <select id="mPartyType">
-                        <option value="Sundry Debtors">Sundry Debtors</option>
-                        <option value="Sundry Creditors">Sundry Creditors</option>
-                        <option value="Bank Accounts">Bank Accounts</option>
-                        <option value="Cash-in-hand">Cash-in-hand</option>
-                        <option value="Indirect Expenses">Indirect Expenses</option>
-                        <option value="Direct Incomes">Direct Incomes</option>
-                    </select>
+                    <select id="mPartyType"><option value="Sundry Debtors">Sundry Debtors</option><option value="Sundry Creditors">Sundry Creditors</option><option value="Bank Accounts">Bank Accounts</option><option value="Cash-in-hand">Cash-in-hand</option><option value="Indirect Expenses">Indirect Expenses</option><option value="Direct Incomes">Direct Incomes</option></select>
                 </div>
                 <div class="grid-2">
                     <div class="form-group"><label>Opening Balance</label><input type="number" id="mOpBal" value="0"></div>
@@ -271,7 +242,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // YOUR FIREBASE DETAILS
     const firebaseConfig = {
         apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
         authDomain: "glacierpos-35f4c.firebaseapp.com",
@@ -288,53 +258,99 @@
     window.masterItems = [];
     window.allVouchers = [];
     window.cart = [];
+    
+    // Tracks which left-side menu is active
+    let activeMenu = 'main';
 
-    // Set dates
     if(document.getElementById('vouchDate')) document.getElementById('vouchDate').valueAsDate = new Date();
 
     // --- NAVIGATION ENGINE ---
+    window.switchMenu = function(menuName) {
+        // Hide all menus
+        document.querySelectorAll('.menu-list').forEach(m => m.classList.remove('active'));
+        // Show target menu
+        document.getElementById('nav-' + menuName).classList.add('active');
+        activeMenu = menuName;
+        // Reset right pane when navigating menus
+        openView('dashboard', 'Gateway of Tally');
+    };
+
     window.openView = function(viewId, title = "Glacier ERP") {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         document.getElementById(`view-${viewId}`).classList.add('active');
         document.getElementById('activeScreenTitle').innerText = title;
-        if(viewId === 'dashboard') calculateDashboard();
         refreshDropdowns();
     };
 
-    window.openVoucher = function(type, title) {
-        openView('voucher', title);
-        document.getElementById('vouchType').value = type;
-        refreshDropdowns();
-    };
+    window.openVoucher = function(type, title) { openView('voucher', title); document.getElementById('vouchType').value = type; refreshDropdowns(); };
+    window.openPOS = function() { openView('pos', 'Inventory Vouchers (Sales)'); refreshDropdowns(); document.getElementById('posSearch').focus(); };
+    window.openReport = function(type, title) { openView('reports', title); runReportLogic(type); };
 
-    window.openPOS = function() {
-        openView('pos', 'Inventory Vouchers (Sales)');
-        refreshDropdowns();
-        document.getElementById('posSearch').focus();
-    };
-
-    window.openReport = function(type, title) {
-        openView('reports', title);
-        runReportLogic(type);
-    };
-
-    // --- KEYBOARD LISTENER (THE TALLY FEEL) ---
+    // --- KEYBOARD LISTENER (DEEP NESTED TALLY FEEL) ---
     document.addEventListener('keydown', function(event) {
-        // Only trigger hotkeys if we are NOT typing in an input field
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') return;
-
         const key = event.key.toLowerCase();
-        if (key === 'a') openView('masters-party', 'Ledger Creation');
-        if (key === 'i') openView('masters-item', 'Stock Item Creation');
-        if (key === 'v') openVoucher('Payment', 'Accounting Vouchers');
-        if (key === 't') openPOS();
-        if (key === 'b') openReport('BS', 'Balance Sheet');
-        if (key === 'p') openReport('PNL', 'Profit & Loss A/c');
-        if (key === 's') openReport('ItemsFlow', 'Stock Summary');
-        if (key === 'd') openView('dashboard', 'Display Dashboard');
         
-        // Escape returns to Dashboard
-        if (event.key === 'Escape') openView('dashboard', 'Gateway of Tally');
+        if (event.key === 'Escape') {
+            if (activeMenu !== 'main') { switchMenu('main'); return; }
+            else { openView('dashboard', 'Gateway of Tally'); return; }
+        }
+
+        // Logic routing based on which menu is currently visible on the left
+        if (activeMenu === 'main') {
+            if (key === 'a') switchMenu('acc-info');
+            if (key === 'i') switchMenu('inv-info');
+            if (key === 'v') openVoucher('Payment', 'Accounting Vouchers');
+            if (key === 't') openPOS();
+            if (key === 'o') switchMenu('import');
+            if (key === 'b') openReport('BS', 'Balance Sheet');
+            if (key === 'p') openReport('PNL', 'Profit & Loss A/c');
+            if (key === 's') openReport('ItemsFlow', 'Stock Summary');
+            if (key === 'r') alert('Ratio Analysis module pending');
+            if (key === 'd') switchMenu('display'); 
+            if (key === 'm') switchMenu('multi-print'); 
+            if (key === 'q') alert('Use browser close to quit.');
+        } 
+        else if (activeMenu === 'acc-info') {
+            if (key === 'g') alert('Groups pending');
+            if (key === 'l') openView('masters-party', 'Ledger Creation');
+            if (key === 't') alert('Statutory Info pending');
+            if (key === 'v') alert('Voucher Types pending');
+            if (key === 'q') switchMenu('main');
+        }
+        else if (activeMenu === 'inv-info') {
+            if (key === 'g') alert('Stock Groups pending');
+            if (key === 'i') openView('masters-item', 'Stock Item Creation');
+            if (key === 'u') alert('Units of Measure pending');
+            if (key === 'v') alert('Voucher Types pending');
+            if (key === 'q') switchMenu('main');
+        }
+        else if (activeMenu === 'display') {
+            if (key === 't') openReport('TB', 'Trial Balance');
+            if (key === 'd') openReport('DayBook', 'Day Book');
+            if (key === 'a') alert('Account Books pending');
+            if (key === 's') alert('Statements of Accounts pending');
+            if (key === 'i') alert('Inventory Books pending');
+            if (key === 'e') alert('Statements of Inventory pending');
+            if (key === 'o') alert('Statutory Reports pending');
+            if (key === 'c') openReport('CashFlow', 'Cash/Funds Flow');
+            if (key === 'l') alert('List of Accounts pending');
+            if (key === 'x') alert('Exception Reports pending');
+            if (key === 'q') switchMenu('main'); 
+        }
+        else if (activeMenu === 'import') {
+            if (key === 'm') alert('Import Masters pending');
+            if (key === 'v') alert('Import Vouchers pending');
+            if (key === 'q') switchMenu('main');
+        }
+        else if (activeMenu === 'multi-print') {
+            if (key === 'a') alert('Print Account Books pending');
+            if (key === 'o') alert('Print Outstanding Statements pending');
+            if (key === 'i') alert('Print Inventory Books pending');
+            if (key === 'd') alert('Print Day Book pending');
+            if (key === 'm') alert('Multi Voucher Printing pending');
+            if (key === 'q') switchMenu('main');
+        }
     });
 
     // --- DATABASE SYNC ---
@@ -348,99 +364,42 @@
 
     window.refreshDropdowns = function() {
         const vSel = document.getElementById('vouchParty');
-        if(vSel) {
-            vSel.innerHTML = '<option value="">-- Select Ledger --</option>';
-            window.masterParties.forEach(p => vSel.innerHTML += `<option value="${p.name}">${p.name} (${p.type})</option>`);
-        }
-        
+        if(vSel) { vSel.innerHTML = '<option value="">-- Select Ledger --</option>'; window.masterParties.forEach(p => vSel.innerHTML += `<option value="${p.name}">${p.name} (${p.type})</option>`); }
         const cSel = document.getElementById('posCustomer');
-        if(cSel) {
-            cSel.innerHTML = '<option value="Cash_Counter">Cash</option>';
-            window.masterParties.filter(p => p.type === 'Sundry Debtors').forEach(p => cSel.innerHTML += `<option value="${p.name}">${p.name}</option>`);
-        }
+        if(cSel) { cSel.innerHTML = '<option value="Cash_Counter">Cash</option>'; window.masterParties.filter(p => p.type === 'Sundry Debtors').forEach(p => cSel.innerHTML += `<option value="${p.name}">${p.name}</option>`); }
     };
 
-    // --- MASTERS ENTRY ---
-    window.saveParty = async function() {
-        const payload = { type: document.getElementById('mPartyType').value, name: document.getElementById('mPartyName').value, opBal: parseFloat(document.getElementById('mOpBal').value)||0, balType: document.getElementById('mBalType').value };
-        if(!payload.name) return;
-        await addDoc(collection(db, "masters_party"), payload);
-        document.getElementById('mPartyName').value = ""; alert("Ledger Accepted"); await fetchCoreData();
-    };
-
-    window.saveItem = async function() {
-        const payload = { name: document.getElementById('mItemName').value, barcode: document.getElementById('mBarcode').value, pp: parseFloat(document.getElementById('mItemPP').value)||0, sp: parseFloat(document.getElementById('mItemSP').value)||0 };
-        if(!payload.name) return;
-        await addDoc(collection(db, "masters_item"), payload);
-        document.getElementById('mItemName').value = ""; document.getElementById('mBarcode').value = ""; alert("Stock Item Accepted"); await fetchCoreData();
-    };
-
-    // --- POS SEARCH AND CART ---
+    // --- MASTERS & POS ---
+    window.saveParty = async function() { await addDoc(collection(db, "masters_party"), { type: document.getElementById('mPartyType').value, name: document.getElementById('mPartyName').value, opBal: parseFloat(document.getElementById('mOpBal').value)||0, balType: document.getElementById('mBalType').value }); document.getElementById('mPartyName').value = ""; alert("Ledger Accepted"); await fetchCoreData(); };
+    window.saveItem = async function() { await addDoc(collection(db, "masters_item"), { name: document.getElementById('mItemName').value, barcode: document.getElementById('mBarcode').value, pp: parseFloat(document.getElementById('mItemPP').value)||0, sp: parseFloat(document.getElementById('mItemSP').value)||0 }); document.getElementById('mItemName').value = ""; document.getElementById('mBarcode').value = ""; alert("Stock Item Accepted"); await fetchCoreData(); };
     const searchInput = document.getElementById('posSearch');
-    if(searchInput) {
-        searchInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') {
-                const sq = e.target.value.toLowerCase().trim();
-                const item = window.masterItems.find(i => (i.barcode && i.barcode.toLowerCase() === sq) || (i.name && i.name.toLowerCase().includes(sq)));
-                if (item) {
-                    const ex = window.cart.find(c => c.id === item.id);
-                    if(ex) ex.qty += 1; else window.cart.push({ id: item.id, name: item.name, qty: 1, rate: item.sp });
-                    renderCart(); e.target.value = '';
-                } else {
-                    alert("Item not found");
-                }
-            }
-        });
-    }
+    if(searchInput) { searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') { const sq = e.target.value.toLowerCase().trim(); const item = window.masterItems.find(i => (i.barcode && i.barcode.toLowerCase() === sq) || (i.name && i.name.toLowerCase().includes(sq))); if (item) { const ex = window.cart.find(c => c.id === item.id); if(ex) ex.qty += 1; else window.cart.push({ id: item.id, name: item.name, qty: 1, rate: item.sp }); renderCart(); e.target.value = ''; } else { alert("Item not found"); } } }); }
+    window.updateCartQty = function(index, val) { window.cart[index].qty = parseFloat(val)||1; renderCart(); }; window.removeCartItem = function(index) { window.cart.splice(index, 1); renderCart(); };
+    window.renderCart = function() { const tbody = document.getElementById('cartBody'); tbody.innerHTML = ''; let gt = 0; window.cart.forEach((item, index) => { const tot = item.qty * item.rate; gt += tot; tbody.innerHTML += `<tr><td>${item.name}</td><td><input type="number" value="${item.qty}" style="width:60px; padding:4px;" onchange="updateCartQty(${index}, this.value)"></td><td>${item.rate}</td><td>${tot.toFixed(2)}</td><td><button onclick="removeCartItem(${index})">X</button></td></tr>`; }); document.getElementById('posGrandTotal').innerText = `₹${gt.toFixed(2)}`; };
+    window.checkoutBill = async function() { if(window.cart.length === 0) return; const payload = { date: new Date().toISOString(), type: 'Sale', party: document.getElementById('posCustomer').value, mode: 'Cash', items: window.cart, amount: parseFloat(document.getElementById('posGrandTotal').innerText.replace('₹','')) }; await addDoc(collection(db, "vouchers_erp"), payload); alert("Invoice Accepted!"); window.cart = []; renderCart(); await fetchCoreData(); };
+    window.saveVoucher = async function() { const amt = parseFloat(document.getElementById('vouchAmt').value); if(!amt) return; await addDoc(collection(db, "vouchers_erp"), { date: document.getElementById('vouchDate').value, type: document.getElementById('vouchType').value, party: document.getElementById('vouchParty').value, mode: 'Cash', amount: amt, remarks: document.getElementById('vouchRem').value }); alert("Voucher Accepted!"); document.getElementById('vouchAmt').value = ""; await fetchCoreData(); };
 
-    window.updateCartQty = function(index, val) { window.cart[index].qty = parseFloat(val)||1; renderCart(); };
-    window.removeCartItem = function(index) { window.cart.splice(index, 1); renderCart(); };
-
-    window.renderCart = function() {
-        const tbody = document.getElementById('cartBody'); tbody.innerHTML = ''; let gt = 0;
-        window.cart.forEach((item, index) => {
-            const tot = item.qty * item.rate; gt += tot;
-            tbody.innerHTML += `<tr><td>${item.name}</td><td><input type="number" value="${item.qty}" style="width:60px; padding:4px;" onchange="updateCartQty(${index}, this.value)"></td><td>${item.rate}</td><td>${tot.toFixed(2)}</td><td><button onclick="removeCartItem(${index})">X</button></td></tr>`;
-        });
-        document.getElementById('posGrandTotal').innerText = `₹${gt.toFixed(2)}`;
-    };
-
-    window.checkoutBill = async function() {
-        if(window.cart.length === 0) return;
-        const payload = { date: new Date().toISOString(), type: 'Sale', party: document.getElementById('posCustomer').value, mode: 'Cash', items: window.cart, amount: parseFloat(document.getElementById('posGrandTotal').innerText.replace('₹','')) };
-        await addDoc(collection(db, "vouchers_erp"), payload);
-        alert("Invoice Accepted!"); window.cart = []; renderCart(); await fetchCoreData();
-    };
-
-    // --- ACCOUNTING VOUCHERS ---
-    window.saveVoucher = async function() {
-        const amt = parseFloat(document.getElementById('vouchAmt').value); if(!amt) return;
-        await addDoc(collection(db, "vouchers_erp"), {
-            date: document.getElementById('vouchDate').value, type: document.getElementById('vouchType').value,
-            party: document.getElementById('vouchParty').value, mode: 'Cash', amount: amt, remarks: document.getElementById('vouchRem').value
-        });
-        alert("Voucher Accepted!"); document.getElementById('vouchAmt').value = ""; await fetchCoreData();
-    };
-
-    // --- REPORTS & DASHBOARD ---
-    window.calculateDashboard = function() {
-        let cash = 0, bank = 0, dr = 0, cr = 0, sales = 0;
-        window.masterParties.forEach(p => {
-            if(p.type === 'Cash-in-hand') cash += p.opBal; if(p.type === 'Bank Accounts') bank += p.opBal;
-        });
-        window.allVouchers.forEach(v => {
-            const amt = parseFloat(v.amount||0);
-            if(v.type === 'Sale') { sales += amt; cash += amt; }
-            if(v.type === 'Receipt') cash += amt;
-            if(v.type === 'Payment' || v.type === 'Purchase') cash -= amt;
-        });
-        if(document.getElementById('dCash')) document.getElementById('dCash').innerText = `₹${cash.toFixed(2)}`;
-        if(document.getElementById('dSales')) document.getElementById('dSales').innerText = `₹${sales.toFixed(2)}`;
-    };
-
+    // --- REPORTS ENGINE ---
     window.runReportLogic = function(type) {
         const c = document.getElementById('reportContainer'); let html = "<table>";
-        if(type === 'PNL') {
+        if(type === 'DayBook') {
+            html += `<tr><th colspan="6" style="font-size:16px; text-align:center;">Day Book</th></tr><tr><th>Date</th><th>Particulars</th><th>Vch Type</th><th>Vch No.</th><th>Debit Amount</th><th>Credit Amount</th></tr>`;
+            window.allVouchers.forEach((v, index) => {
+                const amt = parseFloat(v.amount || v.totalAmount || 0);
+                let dr = '', cr = ''; if(v.type === 'Receipt' || v.type === 'Sale') dr = amt.toFixed(2); else cr = amt.toFixed(2);
+                html += `<tr><td>${v.date.split('T')[0]}</td><td><b>${v.party || 'Cash'}</b></td><td>${v.type}</td><td>${index+1}</td><td>${dr}</td><td>${cr}</td></tr>`;
+            }); html += `</table>`;
+        } else if(type === 'TB') {
+            html += `<tr><th colspan="3" style="font-size:16px; text-align:center;">Trial Balance</th></tr><tr><th>Particulars</th><th>Debit Balances</th><th>Credit Balances</th></tr>`;
+            let tDr = 0, tCr = 0;
+            window.masterParties.forEach(p => {
+                let bal = 0;
+                if(p.opBal) { if(p.balType === 'Dr') bal += p.opBal; else bal -= p.opBal; }
+                window.allVouchers.forEach(v => { const amt = parseFloat(v.amount || 0); if(v.party === p.name) { if(v.type === 'Sale' || v.type === 'Payment') bal += amt; if(v.type === 'Purchase' || v.type === 'Receipt') bal -= amt; }});
+                if(Math.abs(bal) > 0) { if(bal > 0) { tDr += bal; html += `<tr><td>${p.name}</td><td>${bal.toFixed(2)}</td><td></td></tr>`; } else { tCr += Math.abs(bal); html += `<tr><td>${p.name}</td><td></td><td>${Math.abs(bal).toFixed(2)}</td></tr>`; } }
+            });
+            html += `<tr style="font-weight:bold; background:var(--tally-select);"><td>Grand Total</td><td>₹${tDr.toFixed(2)}</td><td>₹${tCr.toFixed(2)}</td></tr></table>`;
+        } else if(type === 'PNL') {
             let sales = 0, exp = 0;
             window.allVouchers.forEach(v => { const a=parseFloat(v.amount||0); if(v.type==='Sale') sales+=a; if(v.type==='Payment') exp+=a; });
             html += `<tr><th colspan="2">Profit & Loss A/c</th></tr><tr><td>Sales Accounts</td><td>${sales.toFixed(2)}</td></tr><tr><td>Indirect Expenses</td><td>${exp.toFixed(2)}</td></tr><tr style="font-weight:bold;"><td>Nett Profit</td><td>${(sales-exp).toFixed(2)}</td></tr></table>`;
@@ -455,7 +414,7 @@
     };
 
     // Startup
-    window.onload = async function() { await fetchCoreData(); openView('dashboard'); };
+    window.onload = async function() { await fetchCoreData(); };
 </script>
 </body>
 </html>
