@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glacier Ultimate ERP</title>
+    <style>
+        :root { --blue: #2980b9; --green: #27ae60; --red: #c0392b; --dark: #2c3e50; --gray: #ecf0f1; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--gray); margin: 0; padding: 0; color: var(--dark); }
+        
+        /* Navigation Bar */
+        .navbar { background: var(--dark); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-brand { font-size: 20px; font-weight: bold; }
+        .nav-links button { background: none; border: none; color: white; padding: 8px 15px; cursor: pointer; font-size: 16px; border-radius: 4px; transition: 0.2s; }
+        .nav-links button:hover, .nav-links button.active { background: var(--blue); }
+
+        /* Main Container & Tabs */
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .tab-content { display: none; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .tab-content.active { display: block; }
+        
+        h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--blue); }
+
+        /* Grid Layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #555; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .btn-main { background: var(--blue); color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-main:hover { background: #1f6391; }
+        .btn-add { background: var(--green); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: var(--gray); }
+        
+        /* Dashboard Cards */
+        .dash-card { background: white; padding: 20px; border-radius: 8px; border-left: 5px solid var(--blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .dash-card h3 { margin: 0 0 10px 0; font-size: 14px; color: #7f8c8d; text-transform: uppercase; }
+        .dash-card .amt { font-size: 24px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">🍦 Glacier ERP</div>
+        <div class="nav-links">
+            <button class="active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button onclick="switchTab('billing')">POS & Purchases</button>
+            <button onclick="switchTab('accounting')">Accounts & Vouchers</button>
+            <button onclick="switchTab('masters')">Masters</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard" class="tab-content active">
+            <h2>Financial Overview</h2>
+            <div class="grid-3">
+                <div class="dash-card" style="border-color: var(--green);"><h3>Cash Balance</h3><div class="amt" id="dashCash">₹0.00</div></div>
+                <div class="dash-card" style="border-color: var(--blue);"><h3>Bank Balance</h3><div class="amt" id="dashBank">₹0.00</div></div>
+                <div class="dash-card" style="border-color: var(--dark);"><h3>Net Sales</h3><div class="amt" id="dashSales">₹0.00</div></div>
+                <div class="dash-card" style="border-color: var(--red);"><h3>Sundry Creditors (To Pay)</h3><div class="amt" id="dashCred">₹0.00</div></div>
+                <div class="dash-card" style="border-color: #f39c12;"><h3>Sundry Debtors (To Receive)</h3><div class="amt" id="dashDebt">₹0.00</div></div>
+            </div>
+            <button class="btn-main" style="margin-top:20px; width:auto;" onclick="calculateDashboard()">🔄 Refresh Dash</button>
+        </div>
+
+        <!-- MASTERS TAB -->
+        <div id="masters" class="tab-content">
+            <div class="grid-2">
+                <!-- Add Party -->
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <h2>👥 Add Party (Ledger)</h2>
+                    <div class="form-group">
+                        <label>Party Type</label>
+                        <select id="mPartyType">
+                            <option value="Customer">Customer (Sundry Debtor)</option>
+                            <option value="Supplier">Supplier (Sundry Creditor)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Party Name</label><input type="text" id="mPartyName" placeholder="e.g. Amul Distributors"></div>
+                    <div class="form-group"><label>Phone Number</label><input type="text" id="mPartyPhone" placeholder="10 Digits"></div>
+                    <button class="btn-main" onclick="saveParty()">💾 Save Party</button>
+                </div>
+
+                <!-- Add Item -->
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <h2>📦 Add Inventory Item</h2>
+                    <div class="form-group"><label>Item Name</label><input type="text" id="mItemName" placeholder="e.g. Vanilla Scoop"></div>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Purchase Price (₹)</label><input type="number" id="mItemPP" placeholder="0.00"></div>
+                        <div class="form-group"><label>Selling Price (₹)</label><input type="number" id="mItemSP" placeholder="0.00"></div>
+                    </div>
+                    <button class="btn-main" onclick="saveItem()">💾 Save Item</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BILLING TAB (POS & PURCHASES) -->
+        <div id="billing" class="tab-content">
+            <h2>🛒 Invoice Entry (Sale / Purchase)</h2>
+            <div class="grid-3" style="background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label>Invoice Type</label>
+                    <select id="bType" onchange="loadParties()">
+                        <option value="Sale">Sale (Outward)</option>
+                        <option value="Purchase">Purchase (Inward)</option>
+                        <option value="Return_Sale">Sale Return (Credit Note)</option>
+                        <option value="Return_Purch">Purchase Return (Debit Note)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Party (Customer/Supplier)</label>
+                    <select id="bParty"><option value="Cash_Counter">Cash Counter (Walk-in)</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Mode</label>
+                    <select id="bMode">
+                        <option value="Cash">Paid via Cash</option>
+                        <option value="Bank">Paid via Bank/UPI</option>
+                        <option value="Credit">Credit (Udhaar)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Item Entry Bar -->
+            <div class="grid-3" style="align-items: end;">
+                <div class="form-group">
+                    <label>Select Item</label>
+                    <select id="bItem" onchange="autoFillRate()"><option value="">-- Choose Item --</option></select>
+                </div>
+                <div class="form-group"><label>Qty</label><input type="number" id="bQty" value="1"></div>
+                <div class="form-group"><label>Rate (₹)</label><input type="number" id="bRate"></div>
+            </div>
+            <button class="btn-add" onclick="addBillingItem()">+ Add to Bill</button>
+
+            <!-- Bill Grid -->
+            <table id="billTable">
+                <thead><tr><th>Item Name</th><th>Qty</th><th>Rate</th><th>Total</th><th>Action</th></tr></thead>
+                <tbody id="billBody"></tbody>
+            </table>
+            
+            <h3 style="text-align: right; color: var(--blue);">Grand Total: ₹<span id="bGrandTotal">0.00</span></h3>
+            <button class="btn-main" style="background: var(--green);" onclick="saveInvoice()">✅ Finalize Invoice</button>
+        </div>
+
+        <!-- ACCOUNTING VOUCHERS TAB -->
+        <div id="accounting" class="tab-content">
+            <h2>📓 Accounting Vouchers</h2>
+            <p style="color: #7f8c8d; font-size: 14px;">Use this for money movements not linked to a specific item invoice.</p>
+            
+            <div style="max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                <div class="form-group">
+                    <label>Voucher Type</label>
+                    <select id="vType" onchange="toggleVoucherFields()">
+                        <option value="Receipt">Receipt (Receive Money)</option>
+                        <option value="Payment">Payment (Send Money)</option>
+                        <option value="Contra_BankDeposit">Contra: Cash Deposit to Bank</option>
+                        <option value="Contra_CashWithdraw">Contra: Cash Withdraw from Bank</option>
+                        <option value="Expense">General Expense</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="vPartyGroup">
+                    <label id="vPartyLabel">Select Ledger Party</label>
+                    <select id="vParty"></select>
+                </div>
+
+                <div class="form-group" id="vModeGroup">
+                    <label>Transaction Mode</label>
+                    <select id="vMode"><option value="Cash">Cash</option><option value="Bank">Bank</option></select>
+                </div>
+
+                <div class="form-group"><label>Amount (₹)</label><input type="number" id="vAmount" placeholder="0.00"></div>
+                <div class="form-group"><label>Narration / Remarks</label><input type="text" id="vRemarks" placeholder="Details of transaction"></div>
+                
+                <button class="btn-main" onclick="saveVoucher()">💾 Save Voucher</button>
+            </div>
+        </div>
+
+    </div>
+
+<!-- FIREBASE & LOGIC -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDdwv7T9NNfLBg9_Mr6r_crbcK00xcyrGU",
+        authDomain: "glacierpos-35f4c.firebaseapp.com",
+        projectId: "glacierpos-35f4c",
+        storageBucket: "glacierpos-35f4c.firebasestorage.app",
+        messagingSenderId: "46444555909",
+        appId: "1:46444555909:web:50430006771bd52eaf83ec"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global State Variables
+    window.masterParties = [];
+    window.masterItems = [];
+    window.currentBillItems = [];
+
+    // --- UI LOGIC ---
+    window.switchTab = function(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+        
+        if(tabId === 'billing') { loadParties(); loadItemsDropdown(); }
+        if(tabId === 'accounting') { loadAllPartiesForVoucher(); }
+        if(tabId === 'dashboard') { calculateDashboard(); }
+    };
+
+    // --- MASTERS LOGIC ---
+    window.saveParty = async function() {
+        const payload = {
+            type: document.getElementById('mPartyType').value,
+            name: document.getElementById('mPartyName').value,
+            phone: document.getElementById('mPartyPhone').value
+        };
+        if(!payload.name) return alert("Party Name is required");
+        await addDoc(collection(db, "masters_party"), payload);
+        alert("Party Saved!");
+        document.getElementById('mPartyName').value = "";
+        fetchMasters(); // Refresh internal list
+    };
+
+    window.saveItem = async function() {
+        const payload = {
+            name: document.getElementById('mItemName').value,
+            pp: parseFloat(document.getElementById('mItemPP').value) || 0,
+            sp: parseFloat(document.getElementById('mItemSP').value) || 0
+        };
+        if(!payload.name) return alert("Item Name is required");
+        await addDoc(collection(db, "masters_item"), payload);
+        alert("Item Saved!");
+        document.getElementById('mItemName').value = "";
+        fetchMasters();
+    };
+
+    window.fetchMasters = async function() {
+        window.masterParties = []; window.masterItems = [];
+        
+        const pSnap = await getDocs(collection(db, "masters_party"));
+        pSnap.forEach(doc => window.masterParties.push({ id: doc.id, ...doc.data() }));
+        
+        const iSnap = await getDocs(collection(db, "masters_item"));
+        iSnap.forEach(doc => window.masterItems.push({ id: doc.id, ...doc.data() }));
+    };
+
+    // --- BILLING LOGIC ---
+    window.loadParties = function() {
+        const type = document.getElementById('bType').value;
+        const sel = document.getElementById('bParty');
+        sel.innerHTML = '<option value="Cash_Counter">Cash Counter (Walk-in)</option>';
+        
+        const targetType = (type.includes('Sale')) ? 'Customer' : 'Supplier';
+        window.masterParties.filter(p => p.type === targetType).forEach(p => {
+            sel.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+        });
+    };
+
+    window.loadItemsDropdown = function() {
+        const sel = document.getElementById('bItem');
+        sel.innerHTML = '<option value="">-- Choose Item --</option>';
+        window.masterItems.forEach(i => {
+            sel.innerHTML += `<option value="${i.id}">${i.name}</option>`;
+        });
+    };
+
+    window.autoFillRate = function() {
+        const itemId = document.getElementById('bItem').value;
+        const invType = document.getElementById('bType').value;
+        const item = window.masterItems.find(i => i.id === itemId);
+        if(item) {
+            document.getElementById('bRate').value = invType.includes('Sale') ? item.sp : item.pp;
+        }
+    };
+
+    window.addBillingItem = function() {
+        const selObj = document.getElementById('bItem');
+        const itemName = selObj.options[selObj.selectedIndex].text;
+        const qty = parseFloat(document.getElementById('bQty').value);
+        const rate = parseFloat(document.getElementById('bRate').value);
+        
+        if(!itemName || !qty || !rate) return alert("Fill all item details");
+        
+        const total = qty * rate;
+        window.currentBillItems.push({ name: itemName, qty, rate, total });
+        
+        renderBillTable();
+    };
+
+    window.renderBillTable = function() {
+        const tbody = document.getElementById('billBody');
+        tbody.innerHTML = "";
+        let gTotal = 0;
+        
+        window.currentBillItems.forEach((item, index) => {
+            gTotal += item.total;
+            tbody.innerHTML += `<tr>
+                <td>${item.name}</td><td>${item.qty}</td><td>₹${item.rate}</td><td>₹${item.total}</td>
+                <td><button onclick="window.currentBillItems.splice(${index}, 1); window.renderBillTable();">X</button></td>
+            </tr>`;
+        });
+        document.getElementById('bGrandTotal').innerText = gTotal.toFixed(2);
+    };
+
+    window.saveInvoice = async function() {
+        if(window.currentBillItems.length === 0) return alert("Bill is empty");
+        
+        const payload = {
+            date: new Date().toISOString(),
+            module: 'Invoice',
+            type: document.getElementById('bType').value, // Sale, Purchase, Return
+            party: document.getElementById('bParty').value,
+            mode: document.getElementById('bMode').value, // Cash, Bank, Credit
+            items: window.currentBillItems,
+            totalAmount: parseFloat(document.getElementById('bGrandTotal').innerText)
+        };
+
+        await addDoc(collection(db, "vouchers_erp"), payload);
+        alert("Invoice Saved Successfully!");
+        window.currentBillItems = [];
+        renderBillTable();
+    };
+
+    // --- ACCOUNTING VOUCHERS LOGIC ---
+    window.loadAllPartiesForVoucher = function() {
+        const sel = document.getElementById('vParty');
+        sel.innerHTML = '<option value="General">-- Select Ledger --</option>';
+        window.masterParties.forEach(p => {
+            sel.innerHTML += `<option value="${p.name}">${p.name} (${p.type})</option>`;
+        });
+    };
+
+    window.toggleVoucherFields = function() {
+        const vType = document.getElementById('vType').value;
+        const pGroup = document.getElementById('vPartyGroup');
+        const mGroup = document.getElementById('vModeGroup');
+        
+        if(vType.includes('Contra')) {
+            pGroup.style.display = 'none'; // Contras only involve cash and bank
+            mGroup.style.display = 'none';
+        } else {
+            pGroup.style.display = 'block';
+            mGroup.style.display = 'block';
+            document.getElementById('vPartyLabel').innerText = vType === 'Receipt' ? 'Receive From' : 'Pay To';
+        }
+    };
+
+    window.saveVoucher = async function() {
+        const type = document.getElementById('vType').value;
+        const amt = parseFloat(document.getElementById('vAmount').value);
+        if(!amt) return alert("Enter valid amount");
+
+        const payload = {
+            date: new Date().toISOString(),
+            module: 'Voucher',
+            type: type,
+            party: type.includes('Contra') ? 'Self' : document.getElementById('vParty').value,
+            mode: type.includes('Contra') ? 'Bank_Cash_Transfer' : document.getElementById('vMode').value,
+            totalAmount: amt,
+            remarks: document.getElementById('vRemarks').value
+        };
+
+        await addDoc(collection(db, "vouchers_erp"), payload);
+        alert("Voucher Saved!");
+        document.getElementById('vAmount').value = "";
+        document.getElementById('vRemarks').value = "";
+    };
+
+    // --- DASHBOARD CALCULATION ENGINE ---
+    window.calculateDashboard = async function() {
+        let cash = 0, bank = 0, debtors = 0, creditors = 0, sales = 0;
+        
+        const snap = await getDocs(collection(db, "vouchers_erp"));
+        snap.forEach(doc => {
+            const v = doc.data();
+            const amt = v.totalAmount;
+            
+            // Core Sales Metric
+            if(v.type === 'Sale') sales += amt;
+            if(v.type === 'Return_Sale') sales -= amt; // Debit Note
+
+            // Credit Logic (Debtors & Creditors)
+            if(v.mode === 'Credit') {
+                if(v.type === 'Sale') debtors += amt;
+                if(v.type === 'Purchase') creditors += amt;
+                if(v.type === 'Return_Sale') debtors -= amt;
+                if(v.type === 'Return_Purch') creditors -= amt;
+            }
+            
+            // Receipts & Payments clear debts
+            if(v.type === 'Receipt') debtors -= amt;
+            if(v.type === 'Payment') creditors -= amt;
+
+            // Liquidity Logic (Cash & Bank)
+            if(v.mode === 'Cash') {
+                if(v.type === 'Sale' || v.type === 'Receipt') cash += amt;
+                if(v.type === 'Purchase' || v.type === 'Payment' || v.type === 'Expense') cash -= amt;
+            }
+            if(v.mode === 'Bank') {
+                if(v.type === 'Sale' || v.type === 'Receipt') bank += amt;
+                if(v.type === 'Purchase' || v.type === 'Payment' || v.type === 'Expense') bank -= amt;
+            }
+
+            // Contra Logic
+            if(v.type === 'Contra_BankDeposit') { cash -= amt; bank += amt; }
+            if(v.type === 'Contra_CashWithdraw') { bank -= amt; cash += amt; }
+        });
+
+        document.getElementById('dashCash').innerText = `₹${cash.toFixed(2)}`;
+        document.getElementById('dashBank').innerText = `₹${bank.toFixed(2)}`;
+        document.getElementById('dashSales').innerText = `₹${sales.toFixed(2)}`;
+        document.getElementById('dashDebt').innerText = `₹${Math.max(0, debtors).toFixed(2)}`;
+        document.getElementById('dashCred').innerText = `₹${Math.max(0, creditors).toFixed(2)}`;
+    };
+
+    // Run on startup
+    window.onload = async function() {
+        await fetchMasters();
+        calculateDashboard();
+    };
+
+</script>
+</body>
+</html>
